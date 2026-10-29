@@ -54,6 +54,7 @@
 #include "debug/Drain.hh"
 #include "debug/ExecFaulting.hh"
 #include "debug/LVP.hh"
+#include "debug/META.hh"
 #include "debug/MinorExecute.hh"
 #include "debug/MinorInterrupt.hh"
 #include "debug/MinorMem.hh"
@@ -100,6 +101,10 @@ Execute::Execute(const std::string &name_,
     vastraSkipSyscallFlush(params.vastraTestSkipSyscallFlush),
     vastraScoreboardRelease(params.enableVAstraScoreboardRelease),
     vastraForwarding(params.enableVAstraForwarding),
+    enableMeta(params.enableMeta),
+    metaAstraLvp(params.metaAstraLvpLoads == enums::off ?
+        MetaAstraLvp::Off : params.metaAstraLvpLoads == enums::train ?
+        MetaAstraLvp::Train : MetaAstraLvp::Candidate),
     vastraSkipStoreScan(params.vastraTestSkipStoreScan),
     noCostFUIndex(fuDescriptions.funcUnits.size() + 1),
     lsq(name_ + ".lsq", name_ + ".dcache_port",
@@ -145,6 +150,11 @@ Execute::Execute(const std::string &name_,
             params.lvpTableEntries, params.lvpConfThreshold);
     }
 
+    if (enableMeta) {
+        meta = std::make_unique<MetaSelector>(&cpu_);
+        lvpLiveUsers.resize(params.numThreads);
+    }
+
     if (enableAstra) {
         astra = std::make_unique<AstraPredictor>(&cpu_,
             params.astraTableEntries);
@@ -185,9 +195,19 @@ Execute::Execute(const std::string &name_,
         vastraScoreboardRelease),
         "%s: enableVAstraForwarding requires enableVAstraBypass and "
         "enableVAstraScoreboardRelease", name_);
-    fatal_if(vastraForwarding && lvpSpecAddr,
+    fatal_if(vastraForwarding && lvpSpecAddr && !enableMeta,
         "%s: enableVAstraForwarding and lvpSpecAddr are mutually exclusive "
-        "in this stage", name_);
+        "unless enableMeta selects between them", name_);
+    fatal_if(enableMeta && !(enableLVP && lvpSpecAddr && vastraForwarding),
+        "%s: enableMeta requires enableLVP, lvpSpecAddr and "
+        "enableVAstraForwarding (and so the V-ASTRA bypass and scoreboard "
+        "release)", name_);
+    fatal_if(metaAstraLvp != MetaAstraLvp::Off && !enableMeta,
+        "%s: metaAstraLvpLoads requires enableMeta", name_);
+    fatal_if(enableMeta && (vastraSkipSyscallFlush || vastraSkipStoreScan),
+        "%s: enableMeta must not be combined with the test-only fault "
+        "injection parameters vastraTestSkipSyscallFlush and "
+        "vastraTestSkipStoreScan", name_);
     fatal_if(vastraForwarding && !allowEarlyMemIssue,
         "%s: enableVAstraForwarding requires executeAllowEarlyMemoryIssue",
         name_);
@@ -485,6 +505,19 @@ Execute::handleMemResponse(MinorDynInstPtr inst,
         panic_if(arch_src != inst->lvpSpecSrcVal,
             "LVP: speculative load %s used source %#x but the "
             "register holds %#x", *inst, inst->lvpSpecSrcVal, arch_src);
+
+        /* The operand is validated: the provisional ASTRA base is now the
+         * load's actual base (it is what the register holds) */
+        if (inst->astraBaseProvisional) {
+            inst->astraBaseProvisional = false;
+            inst->astraBaseValid = true;
+            inst->astraActualBase = arch_src;
+            meta->provisionalResolved(true);
+
+            DPRINTF(ASTRA, "ASTRA base validated tid: %d exec: %d pc: 0x%x "
+                "base: 0x%x\n", inst->id.threadId, inst->id.execSeqNum,
+                inst->pc->instAddr(), inst->astraActualBase);
+        }
     }
 
     if (inst->translationFault != NoFault) {
@@ -538,6 +571,9 @@ Execute::handleMemResponse(MinorDynInstPtr inst,
             /* The loaded value is now in the register file */
             if (enableLVP && is_load && lvpEligibleProducer(inst))
                 lvp_recover = lvpValidateProducer(inst, thread);
+
+            if (enableMeta)
+                metaCheckRecovery(inst, lvp_recover);
 
             /* This memory operation completed without a fault and is not
              * discarded: it is retiring.  The shadow V$ observes it (and
@@ -696,6 +732,17 @@ Execute::executeMemRefInst(MinorDynInstPtr inst, BranchData &branch,
                 DPRINTF(LVP, "Speculative load accepted inst: %s "
                     "producer: %d source: %#x\n", *inst,
                     inst->lvpSpecProducer, inst->lvpSpecSrcVal);
+
+                if (enableMeta) {
+                    panic_if(inst->vaFwdActive, "META: %s was admitted "
+                        "with both an LVP and a V-ASTRA source", *inst);
+                    inst->metaSource = MetaSource::LVP;
+                    ++lvpLiveUsers[inst->id.threadId][inst->lvpSpecProducer];
+                    DPRINTF(META, "META accept exec: %d pc: 0x%x source: "
+                        "lvp producer: %d value: 0x%x\n",
+                        inst->id.execSeqNum, inst->pc->instAddr(),
+                        inst->lvpSpecProducer, inst->lvpSpecSrcVal);
+                }
             }
 
             /* A load that built its request from a published V-ASTRA value
@@ -709,6 +756,16 @@ Execute::executeMemRefInst(MinorDynInstPtr inst, BranchData &branch,
                     "producer: %d value: 0x%x\n", inst->id.execSeqNum,
                     inst->pc->instAddr(), inst->vaFwdProducer,
                     inst->vaFwdSrcVal);
+
+                if (enableMeta) {
+                    panic_if(inst->lvpSpecActive, "META: %s was admitted "
+                        "with both an LVP and a V-ASTRA source", *inst);
+                    inst->metaSource = MetaSource::VAstra;
+                    DPRINTF(META, "META accept exec: %d pc: 0x%x source: "
+                        "vastra producer: %d value: 0x%x\n",
+                        inst->id.execSeqNum, inst->pc->instAddr(),
+                        inst->vaFwdProducer, inst->vaFwdSrcVal);
+                }
             }
 
             /* If the instruction didn't pass its predicate
@@ -1478,15 +1535,34 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                  *  outstanding at the head of the queue */
                 const bool deps_satisfied =
                     head_exec_seq_num > fu_inst->instToWaitFor;
-                const bool spec_admit = !deps_satisfied && enableLVP &&
-                    lvpSpecAddr && lvpSpecAdmissible(ex_info, inst,
-                        mem_response != NULL, fu_inst, head_mem_ref_inst);
+                bool spec_admit = false;
+                bool fwd_admit = false;
 
-                const bool fwd_admit = !deps_satisfied && !spec_admit &&
-                    vastraForwarding && !fu_inst->isBubble() &&
-                    !fu_inst->inLSQ && fu_inst->canEarlyIssue &&
-                    ex_info.streamSeqNum == fu_inst->id.streamSeqNum &&
-                    vastraFwdAdmissible(ex_info, fu_inst, head_mem_ref_inst);
+                if (enableMeta) {
+                    /* One decision per consumer, V-ASTRA before LVP */
+                    if (!deps_satisfied && !fu_inst->isBubble() &&
+                        !fu_inst->inLSQ && fu_inst->canEarlyIssue &&
+                        ex_info.streamSeqNum == fu_inst->id.streamSeqNum) {
+                        const MetaSource choice = metaSelect(ex_info, inst,
+                            mem_response != NULL, fu_inst,
+                            head_mem_ref_inst);
+
+                        spec_admit = choice == MetaSource::LVP;
+                        fwd_admit = choice == MetaSource::VAstra;
+                    }
+                } else {
+                    spec_admit = !deps_satisfied && enableLVP &&
+                        lvpSpecAddr && lvpSpecAdmissible(ex_info, inst,
+                            mem_response != NULL, fu_inst,
+                            head_mem_ref_inst);
+
+                    fwd_admit = !deps_satisfied && !spec_admit &&
+                        vastraForwarding && !fu_inst->isBubble() &&
+                        !fu_inst->inLSQ && fu_inst->canEarlyIssue &&
+                        ex_info.streamSeqNum == fu_inst->id.streamSeqNum &&
+                        vastraFwdAdmissible(ex_info, fu_inst,
+                            head_mem_ref_inst);
+                }
 
                 /* Use this, possibly out of order, inst as the one
                  *  to 'commit'/send to the LSQ */
@@ -1714,6 +1790,9 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     committed_inst);
             }
 
+            if (enableMeta)
+                metaClassify(inst, discard_inst, fault != NoFault);
+
             if (enableAstra) {
                 panic_if(inst != ex_info.inFlightInsts->front().inst,
                     "ASTRA: completing %s but the head of the in flight "
@@ -1917,6 +1996,174 @@ Execute::vastraFwdAdmissible(const ExecuteThreadInfo &ex_info,
     fu_inst->vaFwdSrcVal = e.value;
     fu_inst->vaFwdSrcReg = src;
     return true;
+}
+
+Execute::VAFwdRecord
+Execute::vastraFwdRecord(const MinorDynInstPtr &fu_inst) const
+{
+    const ThreadID tid = fu_inst->id.threadId;
+    const auto &fmap = vaFwdMap[tid];
+    const auto it = fmap.find(fu_inst->instToWaitFor);
+
+    if (it == fmap.end())
+        return VAFwdRecord::None;
+
+    const VAFwdEntry &e = it->second;
+    auto *isa = cpu.getContext(tid)->getIsaPtr();
+    const RegId &src = fu_inst->staticInst->srcRegIdx(0);
+
+    /* The same match as vastraFwdAdmissible: the producer of this load's
+     * only source register, in this load's stream */
+    if (e.stream != fu_inst->id.streamSeqNum || e.destReg != src.flatten(*isa))
+        return VAFwdRecord::None;
+
+    return e.state == VAFwdEntry::Validated ? VAFwdRecord::Validated :
+        e.state == VAFwdEntry::Pending ? VAFwdRecord::Pending :
+        VAFwdRecord::Failed;
+}
+
+MetaSource
+Execute::metaSelect(const ExecuteThreadInfo &ex_info,
+    const MinorDynInstPtr &head, bool head_has_response,
+    const MinorDynInstPtr &fu_inst,
+    const MinorDynInstPtr &head_mem_ref_inst)
+{
+    /* Only loads of the kind both sources serve are consumers */
+    if (!lvpEligibleConsumer(fu_inst))
+        return MetaSource::None;
+
+    if (!fu_inst->metaEvaluated) {
+        fu_inst->metaEvaluated = true;
+        meta->evaluated();
+    }
+
+    auto &stats = meta->stats;
+    uint16_t &seen = fu_inst->metaSeen;
+
+    const VAFwdRecord rec = fu_inst == head_mem_ref_inst ?
+        vastraFwdRecord(fu_inst) : VAFwdRecord::None;
+    /* vastraFwdAdmissible() is true only for a validated record: it also
+     * fills in the forwarded operand, which is used only on VAstra */
+    const bool va_ok = rec == VAFwdRecord::Validated &&
+        vastraFwdAdmissible(ex_info, fu_inst, head_mem_ref_inst);
+    const bool lvp_ok = lvpSpecAdmissible(ex_info, head, head_has_response,
+        fu_inst, head_mem_ref_inst);
+
+    MetaSource choice = MetaSource::None;
+    const char *why;
+
+    if (va_ok) {
+        choice = MetaSource::VAstra;
+        why = "vastra-validated";
+        meta->seen(seen, MetaSeenVAValid, stats.vastraValidated);
+        if (lvp_ok) {
+            meta->seen(seen, MetaSeenLvpOk, stats.lvpAdmissible);
+            /* both could serve: V-ASTRA wins */
+            meta->seen(seen, MetaSeenBoth, stats.bothAdmissible);
+        }
+    } else if (rec == VAFwdRecord::Pending) {
+        /* V-ASTRA could still succeed: never use LVP (or anything else)
+         * for this consumer until that is decided */
+        why = lvp_ok ? "wait-vastra-pending(lvp-ready)" :
+            "wait-vastra-pending";
+        meta->seen(seen, MetaSeenVAPending, stats.vastraPending);
+        if (lvp_ok)
+            meta->seen(seen, MetaSeenLvpHeld, stats.lvpHeldForVAstra);
+    } else {
+        if (rec == VAFwdRecord::Failed)
+            meta->seen(seen, MetaSeenVAFailed, stats.vastraFailed);
+        else
+            meta->seen(seen, MetaSeenVAAbsent, stats.vastraNoRecord);
+
+        if (lvp_ok) {
+            choice = MetaSource::LVP;
+            why = rec == VAFwdRecord::Failed ? "lvp-after-vastra-failed" :
+                "lvp-no-vastra-candidate";
+            meta->seen(seen, MetaSeenLvpOk, stats.lvpAdmissible);
+        } else {
+            why = "none";
+            meta->seen(seen, MetaSeenLvpRefused, stats.lvpRefused);
+        }
+    }
+
+    /* V-ASTRA won over an LVP prediction of the same source */
+    if (choice == MetaSource::VAstra && fu_inst->lvpSpecSrcIdx >= 0 &&
+        fu_inst->lvpSpecProducer == fu_inst->vaFwdProducer) {
+        meta->seen(seen, MetaSeenOverLvp, stats.vastraOverLvp);
+    }
+
+    DPRINTF(META, "META decide exec: %d pc: 0x%x producer: %d choice: %s "
+        "(%s)\n", fu_inst->id.execSeqNum, fu_inst->pc->instAddr(),
+        fu_inst->instToWaitFor,
+        choice == MetaSource::VAstra ? "vastra" :
+        choice == MetaSource::LVP ? "lvp" : "none", why);
+
+    return choice;
+}
+
+void
+Execute::metaCheckRecovery(const MinorDynInstPtr &producer, bool recover)
+{
+    const auto &users = lvpLiveUsers[producer->id.threadId];
+    const auto it = users.find(producer->id.execSeqNum);
+    const unsigned live = it == users.end() ? 0 : it->second;
+
+    if (live == 0)
+        return;
+
+    /* A consumer is accepted only while its producer is predicted and has
+     * no response yet, and acceptance marks the producer used in the same
+     * call chain (lvpUsedBySpec): a producer with live consumers is
+     * predicted, and if its prediction was wrong it must recover */
+    panic_if(producer->lvpProdState != LVPProducerState::Predicted,
+        "META: %s has %d live LVP consumers but no prediction", *producer,
+        live);
+    panic_if(producer->lvpValidation == LVPValidation::Incorrect && !recover,
+        "META: %s was validated incorrect while %d live consumers hold its "
+        "value, but no recovery is raised", *producer, live);
+}
+
+void
+Execute::metaClassify(const MinorDynInstPtr &inst, bool discarded,
+    bool faulted)
+{
+    /* At most one accepted source: the roles are exclusive */
+    panic_if(inst->lvpConsState == LVPConsumerState::Accepted &&
+        inst->vaFwdState == VAFwdConsumer::Accepted,
+        "META: %s consumed both an LVP and a V-ASTRA source", *inst);
+    panic_if((inst->metaSource == MetaSource::LVP) !=
+        (inst->lvpConsState == LVPConsumerState::Accepted ||
+         inst->lvpConsState == LVPConsumerState::Done),
+        "META: source of %s disagrees with its LVP role", *inst);
+    panic_if((inst->metaSource == MetaSource::VAstra) !=
+        (inst->vaFwdState == VAFwdConsumer::Accepted ||
+         inst->vaFwdState == VAFwdConsumer::Done),
+        "META: source of %s disagrees with its V-ASTRA role", *inst);
+
+    if (inst->astraBaseProvisional) {
+        /* squashed or faulted before its operand was validated */
+        panic_if(!discarded && !faulted, "META: committed load %s has a "
+            "provisional ASTRA base", *inst);
+        inst->astraBaseProvisional = false;
+        meta->provisionalResolved(false);
+    }
+
+    if (!inst->metaEvaluated) {
+        panic_if(inst->metaSource != MetaSource::None,
+            "META: %s used a source without being evaluated", *inst);
+        return;
+    }
+
+    const int kind = discarded ? 1 : faulted ? 2 : 0;
+
+    meta->resolved(inst->metaSource, kind);
+    inst->metaEvaluated = false;
+
+    DPRINTF(META, "META outcome exec: %d pc: 0x%x source: %s outcome: %s\n",
+        inst->id.execSeqNum, inst->pc->instAddr(),
+        inst->metaSource == MetaSource::VAstra ? "vastra" :
+        inst->metaSource == MetaSource::LVP ? "lvp" : "none",
+        kind == 0 ? "committed" : kind == 1 ? "squashed" : "faulted");
 }
 
 bool
@@ -2126,6 +2373,17 @@ Execute::lvpClassify(MinorDynInstPtr inst, bool discarded, bool faulted,
     }
 
     if (inst->lvpConsState == LVPConsumerState::Accepted) {
+        if (enableMeta) {
+            auto &users = lvpLiveUsers[inst->id.threadId];
+            const auto it = users.find(inst->lvpSpecProducer);
+
+            panic_if(it == users.end() || it->second == 0,
+                "META: consumer %s of producer %d is not counted",
+                *inst, inst->lvpSpecProducer);
+            if (--it->second == 0)
+                users.erase(it);
+        }
+
         const char *outcome;
         if (discarded) {
             lvp->consumerSquashed();
@@ -2204,11 +2462,42 @@ Execute::astraCaptureBase(const MinorDynInstPtr &inst, ThreadContext *thread)
     if (inst->astraState != ASTRAState::Looked)
         return;
 
+    /* This is only called before initiateAcc, and a load is only executed
+     * again while it is not in the LSQ: a provisional base left here is
+     * from an early attempt whose initiateAcc faulted before a request
+     * existed (the load is now executed at the head).  It was never
+     * validated: drop it before the base of this attempt is captured. */
+    if (inst->astraBaseProvisional) {
+        inst->astraBaseProvisional = false;
+        inst->astraBaseValid = false;
+        meta->provisionalResolved(false);
+
+        DPRINTF(ASTRA, "ASTRA base (provisional) dropped for a new attempt "
+            "tid: %d exec: %d pc: 0x%x\n", inst->id.threadId,
+            inst->id.execSeqNum, inst->pc->instAddr());
+    }
+
     /* Under an LVP predicted source the register does not hold the real
-     * value yet: ASTRA is not meant to be combined with LVP address
-     * speculation in this stage, and such loads are not trained */
-    if (inst->lvpSpecActive)
+     * value yet: such loads are not ASTRA loads (not trained, not V-ASTRA
+     * candidates), unless metaAstraLvpLoads asks otherwise.  Then the
+     * operand is remembered as provisional: it becomes the load's actual
+     * base only when the load's response is handled (metaBaseValidated),
+     * after the producer's validation (a wrong prediction squashes the load
+     * before that).  Only 'candidate' lets the V-ASTRA decision use it. */
+    if (inst->lvpSpecActive) {
+        if (metaAstraLvp == MetaAstraLvp::Off)
+            return;
+
+        inst->astraActualBase = inst->lvpSpecSrcVal;
+        inst->astraBaseProvisional = true;
+        inst->astraBaseValid = metaAstraLvp == MetaAstraLvp::Candidate;
+        meta->provisionalCreated();
+
+        DPRINTF(ASTRA, "ASTRA base (provisional, LVP operand) tid: %d exec: "
+            "%d pc: 0x%x base: 0x%x\n", inst->id.threadId,
+            inst->id.execSeqNum, inst->pc->instAddr(), inst->astraActualBase);
         return;
+    }
 
     /* Called when the effective address is about to be computed from this
      * register, so the register holds the base address (the instruction's
@@ -2669,7 +2958,8 @@ Execute::vastraDecide(const MinorDynInstPtr &inst)
         inst->vaValid = snap.valid;
         std::copy(snap.data.begin(), snap.data.end(), inst->vaData);
 
-        if (vastraForwarding && vastraFwdProducer(inst)) {
+        if (vastraForwarding && vastraFwdProducer(inst) &&
+            !inst->astraBaseProvisional) {
             auto *isa = cpu.getContext(inst->id.threadId)->getIsaPtr();
             VAFwdEntry &e = vaFwdMap[inst->id.threadId][inst->id.execSeqNum];
 
@@ -3289,6 +3579,17 @@ Execute::isDrained()
         lvp->liveSpecLoads() != 0),
         "LVP: drained with %d predictions and %d speculative loads live",
         lvp->livePredictions(), lvp->liveSpecLoads());
+
+    for (ThreadID tid = 0; enableMeta && tid < lvpLiveUsers.size(); tid++) {
+        panic_if(!lvpLiveUsers[tid].empty(),
+            "META: drained with %d producers that still have live LVP "
+            "consumers", lvpLiveUsers[tid].size());
+    }
+    panic_if(enableMeta && meta->liveProvisional() != 0,
+        "META: drained with %d provisional ASTRA bases live",
+        meta->liveProvisional());
+    panic_if(enableMeta && meta->liveConsumers() != 0,
+        "META: drained with %d consumers live", meta->liveConsumers());
 
     for (ThreadID tid = 0; vastraForwarding && tid < vaFwdMap.size(); tid++) {
         panic_if(!vaFwdMap[tid].empty(),

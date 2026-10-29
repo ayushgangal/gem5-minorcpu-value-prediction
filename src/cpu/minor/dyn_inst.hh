@@ -196,6 +196,29 @@ enum class ASTRAState : uint8_t
     Done        /* Classified */
 };
 
+/** The one source a META consumer is served from */
+enum class MetaSource : uint8_t
+{
+    None,       /* normal path: no prediction is used */
+    VAstra,     /* validated V-ASTRA value (forwarding) */
+    LVP         /* confident LVP value (address speculation) */
+};
+
+/** Per-consumer "first seen" bits, so each reason is counted once per
+ *  consumer however many cycles it is evaluated */
+enum MetaSeen : uint16_t
+{
+    MetaSeenVAPending = 1,      /* V-ASTRA record not final yet */
+    MetaSeenVAFailed = 2,       /* V-ASTRA record failed */
+    MetaSeenVAAbsent = 4,       /* no V-ASTRA record for the producer */
+    MetaSeenLvpHeld = 8,        /* LVP admissible but held for V-ASTRA */
+    MetaSeenLvpRefused = 16,    /* LVP rules do not admit the consumer */
+    MetaSeenVAValid = 32,       /* V-ASTRA record validated */
+    MetaSeenLvpOk = 64,         /* LVP rules admit the consumer */
+    MetaSeenBoth = 128,         /* both sources could serve it */
+    MetaSeenOverLvp = 256       /* V-ASTRA served it over its LVP source */
+};
+
 /** State of a load in the diagnostic V-ASTRA probe (see vastra.hh) */
 /** Consumer role of V-ASTRA forwarding (Design B): the request of this load
  *  was built from a published (validated) producer value */
@@ -317,6 +340,9 @@ class MinorDynInst : public RefCounted
     RegVal astraActualBase = 0;
     /** astraActualBase was captured (and not under an LVP prediction) */
     bool astraBaseValid = false;
+    /** astraActualBase is an LVP operand that has not been validated yet
+     *  (metaAstraLvpLoads); cleared when the load's response is handled */
+    bool astraBaseProvisional = false;
 
     /** The address and size of this memory operation once its request has
      *  been pushed into the LSQ (set by LSQ::pushRequest).  Used by the
@@ -359,6 +385,12 @@ class MinorDynInst : public RefCounted
     VAFwdConsumer vaFwdState = VAFwdConsumer::None;
     /** The producer's record was found pending or failed (counted once) */
     uint8_t vaFwdWaited = 0;    /* bit 0 pending, bit 1 failed */
+    /** META (enableMeta): the consumer was evaluated for an early request
+     *  (once), the MetaSeen reasons already counted, and the source its
+     *  request was accepted with.  See Execute::metaSelect */
+    bool metaEvaluated = false;
+    uint16_t metaSeen = 0;
+    MetaSource metaSource = MetaSource::None;
     /** ... and that mark was released early by V-ASTRA (see
      *  Scoreboard::releaseUnpredictable): the commit-time clear must not
      *  decrement again */

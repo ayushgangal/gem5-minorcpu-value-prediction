@@ -58,6 +58,7 @@
 #include "cpu/minor/func_unit.hh"
 #include "cpu/minor/lsq.hh"
 #include "cpu/minor/lvp.hh"
+#include "cpu/minor/meta.hh"
 #include "cpu/minor/pipe_data.hh"
 #include "cpu/minor/scoreboard.hh"
 #include "cpu/minor/vastra.hh"
@@ -153,6 +154,17 @@ class Execute : public Named
     bool vastraSkipSyscallFlush;
     bool vastraScoreboardRelease;
     bool vastraForwarding;
+    /** META selection of LVP or V-ASTRA per dependent load (see
+     *  metaSelect) */
+    bool enableMeta;
+    /** See BaseMinorCPU.metaAstraLvpLoads */
+    enum class MetaAstraLvp
+    {
+        Off,
+        Train,
+        Candidate
+    };
+    MetaAstraLvp metaAstraLvp;
 
     /** Design B: per dynamic producer (execSeqNum), the state of its
      *  V-ASTRA value: created at the decision of a candidate whose result
@@ -177,6 +189,13 @@ class Execute : public Named
     std::vector<std::deque<MinorDynInstPtr>> vastraStores;
 
     std::unique_ptr<LastValuePredictor> lvp;
+    std::unique_ptr<MetaSelector> meta;
+
+    /** META only: per thread, for each LVP producer (by execSeqNum) the
+     *  number of consumers that were accepted with its value and have not
+     *  left the in flight queue.  Checked when the producer is validated
+     *  (metaCheckRecovery) and empty when drained */
+    std::vector<std::map<InstSeqNum, unsigned>> lvpLiveUsers;
 
     /** A confident prediction that a younger load may use as its base
      *  address, for the thread's most recent writer of a register */
@@ -336,6 +355,35 @@ class Execute : public Named
 
     /** Are we between instructions?  Can we be interrupted? */
     bool isInbetweenInsts(ThreadID thread_id) const;
+
+    /** @name META selection (only used if enableMeta)
+     *  @{ */
+    /** State of the V-ASTRA forwarding record of the producer a dependent
+     *  load waits for */
+    enum class VAFwdRecord { None, Pending, Failed, Validated };
+    VAFwdRecord vastraFwdRecord(const MinorDynInstPtr &fu_inst) const;
+
+    /** The one decision for a dependent load at the end of its memory FU
+     *  whose source producer has not committed (head is the oldest
+     *  instruction in flight).  V-ASTRA if the producer's value has been
+     *  published (validated), nothing while the V-ASTRA outcome is still
+     *  pending, otherwise LVP if its existing admission rules allow it,
+     *  otherwise nothing.  On VAstra, vastraFwdAdmissible() has filled in
+     *  the forwarded operand; on LVP the LVP snapshot is used as is. */
+    MetaSource metaSelect(const ExecuteThreadInfo &ex_info,
+        const MinorDynInstPtr &head, bool head_has_response,
+        const MinorDynInstPtr &fu_inst,
+        const MinorDynInstPtr &head_mem_ref_inst);
+
+    /** Structural invariant of the recovery: a producer validated
+     *  incorrect while a live consumer holds its value must have raised a
+     *  recovery (recover is the result of lvpValidateProducer) */
+    void metaCheckRecovery(const MinorDynInstPtr &producer, bool recover);
+
+    /** Where the consumer leaves the in-flight queue */
+    void metaClassify(const MinorDynInstPtr &inst, bool discarded,
+        bool faulted);
+    /** @} */
 
     /** @name Load value prediction lifecycle (only used if enableLVP)
      *  @{ */

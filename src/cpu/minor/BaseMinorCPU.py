@@ -291,6 +291,13 @@ class MinorDefaultFUPool(MinorFUPool):
     ]
 
 
+class MetaAstraLvpLoads(Enum):
+    """What ASTRA / V-ASTRA do with a load whose source operand was supplied
+    by an LVP prediction (enableMeta only)"""
+
+    vals = ["off", "train", "candidate"]
+
+
 class ThreadPolicy(Enum):
     vals = ["SingleThreaded", "RoundRobin", "Random"]
 
@@ -511,14 +518,34 @@ class BaseMinorCPU(BaseCPU):
         " loads are marked unpredictable at issue (memory FU"
         " extraAssumedLat = 0, configs/research/vp_stall_on_use.py)",
     )
+    enableMeta = Param.Bool(
+        False,
+        "META selection (research prototype): a dependent load whose only"
+        " source is the result of a load that has not committed is served"
+        " by V-ASTRA forwarding if the producer's value is validated, by"
+        " nothing while that V-ASTRA outcome is pending, else by LVP address"
+        " speculation if its rules admit the load, else not at all (needs"
+        " enableLVP, lvpSpecAddr and enableVAstraForwarding; excludes the"
+        " test-only fault injection parameters)",
+    )
+    metaAstraLvpLoads = Param.MetaAstraLvpLoads(
+        "off",
+        "Experiment (needs enableMeta): a load served by an LVP operand,"
+        " with 'off': is not an ASTRA/V-ASTRA load at all (default);"
+        " 'train': trains ASTRA once its operand is validated (at its"
+        " response, after the producer's validation), no V-ASTRA candidate;"
+        " 'candidate': also a provisional V-ASTRA candidate when ASTRA's"
+        " predicted base equals the LVP operand (bypass allowed, no"
+        " forwarding record is published from it)",
+    )
     enableVAstraForwarding = Param.Bool(
         False,
         "Design B (research prototype, needs enableVAstraBypass and"
-        " enableVAstraScoreboardRelease; excludes lvpSpecAddr): a load whose"
-        " only source is the result of a load that reached the final V-ASTRA"
-        " bypass success builds its effective address from that validated"
-        " value and sends its request before the producer commits; a"
-        " pending or failed producer is never used",
+        " enableVAstraScoreboardRelease; excludes lvpSpecAddr unless"
+        " enableMeta): a load whose only source is the result of a load that"
+        " reached the final V-ASTRA bypass success builds its effective"
+        " address from that validated value and sends its request before the"
+        " producer commits; a pending or failed producer is never used",
     )
     vastraTestSkipStoreScan = Param.Bool(
         False,
