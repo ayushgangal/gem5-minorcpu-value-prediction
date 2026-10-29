@@ -1,0 +1,359 @@
+k1 np: exit status 0
+k1 lvp: exit status 0
+k1 va: exit status 0
+k1 meta: exit status 0
+PASS  k1: every mode exits 0 ({'np': 0, 'lvp': 0, 'va': 0, 'meta': 0})
+PASS  k1: identical output in every mode (2672424020)
+PASS  k1: committed instruction stream and values identical to NO-PREDICTION in every mode (3590 instructions)
+INFO  k1: ROI/whole-run numCycles (information only) {'np': 17303, 'lvp': 12053, 'va': 2645, 'meta': 2649}
+PASS  k1 META: every consumer has at most one accepted source (3 accepted, 0 violations)
+PASS  k1 META: the LVP consumers are exactly the loads LVP accepted (3)
+PASS  k1 META: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k1 META: no consumer was served by both sources
+PASS  k1 META: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 658 decisions (0 violations [])
+PASS  k1 META: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k1 META: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k1 META: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k1 META: recovery ordering: 0 wrong used predictions, each with one redirect, every consumer accepted before the validation, never handled or committed and discarded; 0 bypassed consumers (0 in the strict order bypass <= validation <= redirect <= discard) (0 violations [])
+PASS  k1 META: each of the 147 evaluated consumers has exactly one outcome (0 violations)
+PASS  k1 META: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k1 META ROI: evaluated 103 + carry-in 0 == resolved 103 + in flight 0
+PASS  k1 META ROI: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k1 META ROI: LVP consumers by outcome sum to the LVP count (3)
+PASS  k1 META ROI: LVP speculative-load identity holds
+PASS  k1 META ROI: V-ASTRA forwarding identity holds
+PASS  k1 np: no META event in a standalone mode
+PASS  k1 lvp: no META event in a standalone mode
+PASS  k1 va: no META event in a standalone mode
+PASS  k1: ROI committed instructions equal in every mode (3436)
+INFO  k1: META ROI selections V-ASTRA 0, LVP 3, none 100; LVP-only recoveries 0, META recoveries 0
+PASS  k1: both predictors can predict the chain (LVP 400 confident, V-ASTRA 399 synthetic responses) and V-ASTRA wins: LVP served 3 consumers (warm-up laps only)
+directed-one: 0 failure(s)
+k2 np: exit status 0
+k2 lvp: exit status 0
+k2 va: exit status 0
+k2 meta: exit status 0
+PASS  k2: every mode exits 0 ({'np': 0, 'lvp': 0, 'va': 0, 'meta': 0})
+PASS  k2: identical output in every mode (45431209460)
+PASS  k2: committed instruction stream and values identical to NO-PREDICTION in every mode (5703 instructions)
+INFO  k2: ROI/whole-run numCycles (information only) {'np': 15600, 'lvp': 12500, 'va': 15600, 'meta': 12500}
+PASS  k2 META: every consumer has at most one accepted source (408 accepted, 0 violations)
+PASS  k2 META: the LVP consumers are exactly the loads LVP accepted (408)
+PASS  k2 META: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k2 META: no consumer was served by both sources
+PASS  k2 META: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 7991 decisions (0 violations [])
+PASS  k2 META: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k2 META: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k2 META: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k2 META: recovery ordering: 0 wrong used predictions, each with one redirect, every consumer accepted before the validation, never handled or committed and discarded; 0 bypassed consumers (0 in the strict order bypass <= validation <= redirect <= discard) (0 violations [])
+PASS  k2 META: each of the 560 evaluated consumers has exactly one outcome (0 violations)
+PASS  k2 META: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k2 META ROI: evaluated 400 + carry-in 0 == resolved 400 + in flight 0
+PASS  k2 META ROI: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k2 META ROI: LVP consumers by outcome sum to the LVP count (300)
+PASS  k2 META ROI: LVP speculative-load identity holds
+PASS  k2 META ROI: V-ASTRA forwarding identity holds
+PASS  k2 np: no META event in a standalone mode
+PASS  k2 lvp: no META event in a standalone mode
+PASS  k2 va: no META event in a standalone mode
+PASS  k2: ROI committed instructions equal in every mode (5536)
+INFO  k2: META ROI selections V-ASTRA 0, LVP 300, none 100; LVP-only recoveries 0, META recoveries 0
+PASS  k2: V-ASTRA falls back (V$ tag miss; 3 synthetic responses) and LVP serves 300 consumers
+PASS  k2: every LVP choice names its reason ['lvp-after-vastra-failed', 'lvp-no-vastra-candidate']
+PASS  k2: no consumer was given to V-ASTRA
+directed-one: 0 failure(s)
+k3 np: exit status 0
+k3 lvp: exit status 0
+k3 va: exit status 0
+k3 meta: exit status 0
+PASS  k3: every mode exits 0 ({'np': 0, 'lvp': 0, 'va': 0, 'meta': 0})
+PASS  k3: identical output in every mode (85517568640)
+PASS  k3: committed instruction stream and values identical to NO-PREDICTION in every mode (5012 instructions)
+INFO  k3: ROI/whole-run numCycles (information only) {'np': 16101, 'lvp': 13379, 'va': 6470, 'meta': 6576}
+PASS  k3 META: every consumer has at most one accepted source (8 accepted, 0 violations)
+PASS  k3 META: the LVP consumers are exactly the loads LVP accepted (8)
+PASS  k3 META: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k3 META: no consumer was served by both sources
+PASS  k3 META: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 867 decisions (0 violations [])
+PASS  k3 META: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k3 META: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k3 META: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k3 META: recovery ordering: 0 wrong used predictions, each with one redirect, every consumer accepted before the validation, never handled or committed and discarded; 0 bypassed consumers (0 in the strict order bypass <= validation <= redirect <= discard) (0 violations [])
+PASS  k3 META: each of the 156 evaluated consumers has exactly one outcome (0 violations)
+PASS  k3 META: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k3 META ROI: evaluated 109 + carry-in 0 == resolved 109 + in flight 0
+PASS  k3 META ROI: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k3 META ROI: LVP consumers by outcome sum to the LVP count (6)
+PASS  k3 META ROI: LVP speculative-load identity holds
+PASS  k3 META ROI: V-ASTRA forwarding identity holds
+PASS  k3 np: no META event in a standalone mode
+PASS  k3 lvp: no META event in a standalone mode
+PASS  k3 va: no META event in a standalone mode
+PASS  k3: ROI committed instructions equal in every mode (4845)
+INFO  k3: META ROI selections V-ASTRA 0, LVP 6, none 103; LVP-only recoveries 3, META recoveries 0
+PASS  k3: LVP's independent prediction was wrong 3 times, and no LVP recovery was raised (0)
+PASS  k3: control: LVP-only recovered 3 wrong predictions of the same program
+directed-one: 0 failure(s)
+k4 np: exit status 0
+k4 lvp: exit status 0
+k4 va: exit status 0
+k4 meta: exit status 0
+PASS  k4: every mode exits 0 ({'np': 0, 'lvp': 0, 'va': 0, 'meta': 0})
+PASS  k4: identical output in every mode (45431209460)
+PASS  k4: committed instruction stream and values identical to NO-PREDICTION in every mode (6558 instructions)
+INFO  k4: ROI/whole-run numCycles (information only) {'np': 16402, 'lvp': 12190, 'va': 16349, 'meta': 12190}
+PASS  k4 META: every consumer has at most one accepted source (403 accepted, 0 violations)
+PASS  k4 META: the LVP consumers are exactly the loads LVP accepted (403)
+PASS  k4 META: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k4 META: no consumer was served by both sources
+PASS  k4 META: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 6088 decisions (0 violations [])
+PASS  k4 META: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k4 META: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k4 META: every LVP recovery redirect (4) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k4 META: recovery ordering: 4 wrong used predictions, each with one redirect, every consumer accepted before the validation, never handled or committed and discarded; 0 bypassed consumers (0 in the strict order bypass <= validation <= redirect <= discard) (0 violations [])
+PASS  k4 META: each of the 563 evaluated consumers has exactly one outcome (0 violations)
+PASS  k4 META: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k4 META ROI: evaluated 402 + carry-in 0 == resolved 402 + in flight 0
+PASS  k4 META ROI: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k4 META ROI: LVP consumers by outcome sum to the LVP count (296)
+PASS  k4 META ROI: LVP speculative-load identity holds
+PASS  k4 META ROI: V-ASTRA forwarding identity holds
+PASS  k4 np: no META event in a standalone mode
+PASS  k4 lvp: no META event in a standalone mode
+PASS  k4 va: no META event in a standalone mode
+PASS  k4: ROI committed instructions equal in every mode (6391)
+INFO  k4: META ROI selections V-ASTRA 0, LVP 296, none 106; LVP-only recoveries 3, META recoveries 3
+PASS  k4: V-ASTRA falls back (V$ tag miss; 4 synthetic responses) and LVP serves 296 consumers
+PASS  k4: every LVP choice names its reason ['lvp-after-vastra-failed', 'lvp-no-vastra-candidate']
+PASS  k4: no consumer was given to V-ASTRA
+PASS  k4: LVP-selected consumers recover wrong predictions as in LVP-only: 3 recoveries (META) vs 3 (LVP-only)
+PASS  k4: recovery redirects in the trace: 4
+PASS  k4: each recovery follows an incorrect validation (0 violations)
+directed-one: 0 failure(s)
+k5 np: exit status 0
+k5 lvp: exit status 0
+k5 va: exit status 0
+k5 meta: exit status 0
+PASS  k5: every mode exits 0 ({'np': 0, 'lvp': 0, 'va': 0, 'meta': 0})
+PASS  k5: identical output in every mode (2957813)
+PASS  k5: committed instruction stream and values identical to NO-PREDICTION in every mode (15659 instructions)
+INFO  k5: ROI/whole-run numCycles (information only) {'np': 19004, 'lvp': 19004, 'va': 15410, 'meta': 15410}
+PASS  k5 META: every consumer has at most one accepted source (0 accepted, 0 violations)
+PASS  k5 META: the LVP consumers are exactly the loads LVP accepted (0)
+PASS  k5 META: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k5 META: no consumer was served by both sources
+PASS  k5 META: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 6897 decisions (0 violations [])
+PASS  k5 META: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k5 META: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k5 META: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k5 META: recovery ordering: 0 wrong used predictions, each with one redirect, every consumer accepted before the validation, never handled or committed and discarded; 0 bypassed consumers (0 in the strict order bypass <= validation <= redirect <= discard) (0 violations [])
+PASS  k5 META: each of the 396 evaluated consumers has exactly one outcome (0 violations)
+PASS  k5 META: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k5 META ROI: evaluated 282 + carry-in 0 == resolved 282 + in flight 0
+PASS  k5 META ROI: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k5 META ROI: LVP consumers by outcome sum to the LVP count (0)
+PASS  k5 META ROI: LVP speculative-load identity holds
+PASS  k5 META ROI: V-ASTRA forwarding identity holds
+PASS  k5 np: no META event in a standalone mode
+PASS  k5 lvp: no META event in a standalone mode
+PASS  k5 va: no META event in a standalone mode
+PASS  k5: ROI committed instructions equal in every mode (15544)
+INFO  k5: META ROI selections V-ASTRA 0, LVP 0, none 282; LVP-only recoveries 0, META recoveries 0
+PASS  k5: no prediction is used: 282 consumers evaluated, all none
+directed-one: 0 failure(s)
+k6 np: exit status 0
+k6 lvp: exit status 0
+k6 va: exit status 0
+k6 meta: exit status 0
+PASS  k6: every mode exits 0 ({'np': 0, 'lvp': 0, 'va': 0, 'meta': 0})
+PASS  k6: identical output in every mode (230518528)
+PASS  k6: committed instruction stream and values identical to NO-PREDICTION in every mode (5473 instructions)
+INFO  k6: ROI/whole-run numCycles (information only) {'np': 27800, 'lvp': 27800, 'va': 17065, 'meta': 17065}
+PASS  k6 META: every consumer has at most one accepted source (131 accepted, 0 violations)
+PASS  k6 META: the LVP consumers are exactly the loads LVP accepted (0)
+PASS  k6 META: the V-ASTRA consumers are exactly the forwarding admissions (131)
+PASS  k6 META: no consumer was served by both sources
+PASS  k6 META: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 1183 decisions (0 violations [])
+PASS  k6 META: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k6 META: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k6 META: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k6 META: recovery ordering: 0 wrong used predictions, each with one redirect, every consumer accepted before the validation, never handled or committed and discarded; 0 bypassed consumers (0 in the strict order bypass <= validation <= redirect <= discard) (0 violations [])
+PASS  k6 META: each of the 140 evaluated consumers has exactly one outcome (0 violations)
+PASS  k6 META: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k6 META ROI: evaluated 100 + carry-in 0 == resolved 100 + in flight 0
+PASS  k6 META ROI: V-ASTRA consumers by outcome sum to the V-ASTRA count (94)
+PASS  k6 META ROI: LVP consumers by outcome sum to the LVP count (0)
+PASS  k6 META ROI: LVP speculative-load identity holds
+PASS  k6 META ROI: V-ASTRA forwarding identity holds
+PASS  k6 np: no META event in a standalone mode
+PASS  k6 lvp: no META event in a standalone mode
+PASS  k6 va: no META event in a standalone mode
+PASS  k6: ROI committed instructions equal in every mode (5332)
+INFO  k6: META ROI selections V-ASTRA 94, LVP 0, none 6; LVP-only recoveries 0, META recoveries 0
+PASS  k6: V-ASTRA serves 94 consumers by forwarding (fwdAdmitted 94), LVP none
+PASS  k6: the request of every forwarded consumer (131) entered the LSQ before its producer committed
+directed-one: 0 failure(s)
+k7 np: exit status 0
+k7 lvp: exit status 0
+k7 va: exit status 0
+k7 meta: exit status 0
+PASS  k7: every mode exits 0 ({'np': 0, 'lvp': 0, 'va': 0, 'meta': 0})
+PASS  k7: identical output in every mode (45663448308)
+PASS  k7: committed instruction stream and values identical to NO-PREDICTION in every mode (10696 instructions)
+INFO  k7: ROI/whole-run numCycles (information only) {'np': 43172, 'lvp': 39839, 'va': 32570, 'meta': 29666}
+PASS  k7 META: every consumer has at most one accepted source (539 accepted, 0 violations)
+PASS  k7 META: the LVP consumers are exactly the loads LVP accepted (408)
+PASS  k7 META: the V-ASTRA consumers are exactly the forwarding admissions (131)
+PASS  k7 META: no consumer was served by both sources
+PASS  k7 META: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 9274 decisions (0 violations [])
+PASS  k7 META: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k7 META: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k7 META: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k7 META: recovery ordering: 0 wrong used predictions, each with one redirect, every consumer accepted before the validation, never handled or committed and discarded; 0 bypassed consumers (0 in the strict order bypass <= validation <= redirect <= discard) (0 violations [])
+PASS  k7 META: each of the 700 evaluated consumers has exactly one outcome (0 violations)
+PASS  k7 META: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k7 META ROI: evaluated 500 + carry-in 0 == resolved 500 + in flight 0
+PASS  k7 META ROI: V-ASTRA consumers by outcome sum to the V-ASTRA count (94)
+PASS  k7 META ROI: LVP consumers by outcome sum to the LVP count (300)
+PASS  k7 META ROI: LVP speculative-load identity holds
+PASS  k7 META ROI: V-ASTRA forwarding identity holds
+PASS  k7 np: no META event in a standalone mode
+PASS  k7 lvp: no META event in a standalone mode
+PASS  k7 va: no META event in a standalone mode
+PASS  k7: ROI committed instructions equal in every mode (10529)
+INFO  k7: META ROI selections V-ASTRA 94, LVP 300, none 106; LVP-only recoveries 0, META recoveries 0
+PASS  k7: both sources serve consumers in one program (V-ASTRA 94, LVP 300)
+directed-one: 0 failure(s)
+k8 np: exit status 0
+k8 lvp: exit status 0
+k8 va: exit status 0
+k8 meta: exit status 0
+PASS  k8: every mode exits 0 ({'np': 0, 'lvp': 0, 'va': 0, 'meta': 0})
+PASS  k8: identical output in every mode (2672424020)
+PASS  k8: committed instruction stream and values identical to NO-PREDICTION in every mode (5130 instructions)
+INFO  k8: ROI/whole-run numCycles (information only) {'np': 17151, 'lvp': 12840, 'va': 12718, 'meta': 12718}
+PASS  k8 META: every consumer has at most one accepted source (3 accepted, 0 violations)
+PASS  k8 META: the LVP consumers are exactly the loads LVP accepted (3)
+PASS  k8 META: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k8 META: no consumer was served by both sources
+PASS  k8 META: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 130 decisions (0 violations [])
+PASS  k8 META: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k8 META: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k8 META: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k8 META: recovery ordering: 0 wrong used predictions, each with one redirect, every consumer accepted before the validation, never handled or committed and discarded; 0 bypassed consumers (0 in the strict order bypass <= validation <= redirect <= discard) (0 violations [])
+PASS  k8 META: each of the 7 evaluated consumers has exactly one outcome (0 violations)
+PASS  k8 META: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k8 META ROI: evaluated 3 + carry-in 0 == resolved 3 + in flight 0
+PASS  k8 META ROI: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k8 META ROI: LVP consumers by outcome sum to the LVP count (3)
+PASS  k8 META ROI: LVP speculative-load identity holds
+PASS  k8 META ROI: V-ASTRA forwarding identity holds
+PASS  k8 np: no META event in a standalone mode
+PASS  k8 lvp: no META event in a standalone mode
+PASS  k8 va: no META event in a standalone mode
+PASS  k8: ROI committed instructions equal in every mode (4976)
+INFO  k8: META ROI selections V-ASTRA 0, LVP 3, none 0; LVP-only recoveries 0, META recoveries 0
+directed-one: 0 failure(s)
+k9 np: exit status 0
+k9 lvp: exit status 0
+k9 va: exit status 0
+k9 meta: exit status 0
+PASS  k9: every mode exits 0 ({'np': 0, 'lvp': 0, 'va': 0, 'meta': 0})
+PASS  k9: identical output in every mode (610176000)
+PASS  k9: committed instruction stream and values identical to NO-PREDICTION in every mode (2886 instructions)
+INFO  k9: ROI/whole-run numCycles (information only) {'np': 14511, 'lvp': 14511, 'va': 14243, 'meta': 14243}
+PASS  k9 META: every consumer has at most one accepted source (276 accepted, 0 violations)
+PASS  k9 META: the LVP consumers are exactly the loads LVP accepted (0)
+PASS  k9 META: the V-ASTRA consumers are exactly the forwarding admissions (276)
+PASS  k9 META: no consumer was served by both sources
+PASS  k9 META: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 620 decisions (0 violations [])
+PASS  k9 META: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k9 META: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k9 META: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k9 META: recovery ordering: 0 wrong used predictions, each with one redirect, every consumer accepted before the validation, never handled or committed and discarded; 0 bypassed consumers (0 in the strict order bypass <= validation <= redirect <= discard) (0 violations [])
+PASS  k9 META: each of the 419 evaluated consumers has exactly one outcome (0 violations)
+PASS  k9 META: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k9 META ROI: evaluated 300 + carry-in 0 == resolved 300 + in flight 0
+PASS  k9 META ROI: V-ASTRA consumers by outcome sum to the V-ASTRA count (200)
+PASS  k9 META ROI: LVP consumers by outcome sum to the LVP count (0)
+PASS  k9 META ROI: LVP speculative-load identity holds
+PASS  k9 META ROI: V-ASTRA forwarding identity holds
+PASS  k9 np: no META event in a standalone mode
+PASS  k9 lvp: no META event in a standalone mode
+PASS  k9 va: no META event in a standalone mode
+PASS  k9: ROI committed instructions equal in every mode (2745)
+INFO  k9: META ROI selections V-ASTRA 200, LVP 0, none 100; LVP-only recoveries 0, META recoveries 0
+PASS  k9: V-ASTRA serves 200 consumers by forwarding (fwdAdmitted 200), LVP none
+PASS  k9: the request of every forwarded consumer (276) entered the LSQ before its producer committed
+PASS  k9: V-ASTRA served 200 consumers whose source LVP also predicted
+directed-one: 0 failure(s)
+k10 np: exit status 0
+k10 lvp: exit status 0
+k10 va: exit status 0
+k10 meta: exit status 0
+PASS  k10: every mode exits 0 ({'np': 0, 'lvp': 0, 'va': 0, 'meta': 0})
+PASS  k10: identical output in every mode (610188288)
+PASS  k10: committed instruction stream and values identical to NO-PREDICTION in every mode (3178 instructions)
+INFO  k10: ROI/whole-run numCycles (information only) {'np': 14554, 'lvp': 14554, 'va': 14404, 'meta': 14404}
+PASS  k10 META: every consumer has at most one accepted source (272 accepted, 0 violations)
+PASS  k10 META: the LVP consumers are exactly the loads LVP accepted (0)
+PASS  k10 META: the V-ASTRA consumers are exactly the forwarding admissions (272)
+PASS  k10 META: no consumer was served by both sources
+PASS  k10 META: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 1087 decisions (0 violations [])
+PASS  k10 META: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k10 META: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k10 META: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k10 META: recovery ordering: 0 wrong used predictions, each with one redirect, every consumer accepted before the validation, never handled or committed and discarded; 0 bypassed consumers (0 in the strict order bypass <= validation <= redirect <= discard) (0 violations [])
+PASS  k10 META: each of the 419 evaluated consumers has exactly one outcome (0 violations)
+PASS  k10 META: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k10 META ROI: evaluated 300 + carry-in 0 == resolved 300 + in flight 0
+PASS  k10 META ROI: V-ASTRA consumers by outcome sum to the V-ASTRA count (197)
+PASS  k10 META ROI: LVP consumers by outcome sum to the LVP count (0)
+PASS  k10 META ROI: LVP speculative-load identity holds
+PASS  k10 META ROI: V-ASTRA forwarding identity holds
+PASS  k10 np: no META event in a standalone mode
+PASS  k10 lvp: no META event in a standalone mode
+PASS  k10 va: no META event in a standalone mode
+PASS  k10: ROI committed instructions equal in every mode (3037)
+INFO  k10: META ROI selections V-ASTRA 197, LVP 0, none 103; LVP-only recoveries 0, META recoveries 0
+PASS  k10: LVP's independent prediction was wrong 3 times, and no LVP recovery was raised (0)
+PASS  k10: V-ASTRA serves 197 consumers by forwarding (fwdAdmitted 197), LVP none
+PASS  k10: the request of every forwarded consumer (272) entered the LSQ before its producer committed
+PASS  k10: V-ASTRA served 194 consumers whose source LVP also predicted
+PASS  k10: 4 consumers were served by V-ASTRA while LVP's prediction for their producer was validated incorrect (no recovery)
+PASS  k10: no LVP recovery in the META run
+directed-one: 0 failure(s)
+forward np: exit status 0
+forward lvp: exit status 0
+forward va: exit status 0
+forward meta: exit status 0
+PASS  forward: every mode exits 0 ({'np': 0, 'lvp': 0, 'va': 0, 'meta': 0})
+PASS  forward: identical output in every mode (147629574100533)
+PASS  forward: committed instruction stream and values identical to NO-PREDICTION in every mode (160509 instructions)
+INFO  forward: ROI/whole-run numCycles (information only) {'np': 501793, 'lvp': 501780, 'va': 501778, 'meta': 501778}
+PASS  forward META: every consumer has at most one accepted source (121 accepted, 0 violations)
+PASS  forward META: the LVP consumers are exactly the loads LVP accepted (13)
+PASS  forward META: the V-ASTRA consumers are exactly the forwarding admissions (108)
+PASS  forward META: no consumer was served by both sources
+PASS  forward META: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 11554 decisions (0 violations [])
+PASS  forward META: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  forward META: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  forward META: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  forward META: recovery ordering: 0 wrong used predictions, each with one redirect, every consumer accepted before the validation, never handled or committed and discarded; 0 bypassed consumers (0 in the strict order bypass <= validation <= redirect <= discard) (0 violations [])
+PASS  forward META: each of the 480 evaluated consumers has exactly one outcome (0 violations)
+PASS  forward META: each outcome names the source the consumer was accepted with (0 violations)
+PASS  forward META: evaluated 480 + carry-in 0 == resolved 480 + in flight 0
+PASS  forward META: V-ASTRA consumers by outcome sum to the V-ASTRA count (108)
+PASS  forward META: LVP consumers by outcome sum to the LVP count (13)
+PASS  forward META: LVP speculative-load identity holds
+PASS  forward META: V-ASTRA forwarding identity holds
+PASS  forward META: values published (657) and forwarded (108)
+INFO  forward: V-ASTRA-only published 670 admitted 108; META published 657 admitted 108 LVP consumers 13
+PASS  forward META: 14 candidates rejected by an older store: none has a record that was published
+PASS  forward META: 14 abandoned candidates: never published, no consumer took their value
+PASS  forward META: no consumer took a value from any of the 144 failed records
+PASS  forward META: 47 forwarded loads took their value from another forwarded load (chain; producer identity ok)
+PASS  forward META: every consumer's producer is older than it
+PASS  forward META: V-ASTRA consumers committed and were squashed (wrong path, and by a producer's translation fault): {'vastraCommitted': 96, 'vastraSquashed': 12, 'vastraFaulted': 0}
+INFO  forward META: consumers that found a pending record 13, failed record 41
+directed-forward: 0 failure(s)

@@ -1,0 +1,17 @@
+cpu-minor: add META selection between LVP and V-ASTRA
+
+Add META source selection for eligible dependent loads, choosing between
+validated V-ASTRA forwarding and LVP speculation.
+
+Add the metaAstraLvpLoads off, train and candidate experiment modes,
+along with tests for selection, lifecycle, recovery and provisional
+ASTRA base retry handling.
+
+Validation:
+- META config, directed, lifecycle and astra-lvp suites passed on
+  earlier binaries.
+- Alignment regression: 92 checks passed after the retry fix.
+- Focused ASTRA/LVP tests: 164 checks passed after the retry fix.
+- Applicable style and pre-commit checks passed.
+- Final rebuild and full regression on the final source remain pending
+  due to insufficient available disk space.

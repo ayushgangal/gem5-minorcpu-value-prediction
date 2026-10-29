@@ -1,0 +1,69 @@
+astra-lvp full avail= 3307MB
+astra-lvp rc=0 PASS=8780 FAIL=0
+meta config avail= 2232MB
+meta config rc=0 PASS=25 FAIL=0
+meta directed avail= 2236MB
+meta directed rc=0 PASS=281 FAIL=0
+meta lifecycle avail= 2009MB
+meta lifecycle rc=0 PASS=4625 FAIL=0
+before astra avail= 1414MB
+astra rc=0 PASS=78 FAIL=0
+done astra
+before vcache avail= 1415MB
+vcache rc=0 PASS=157 FAIL=0
+done vcache
+before vastra avail= 1371MB
+vastra rc=0 PASS=276 FAIL=0
+done vastra
+before lvp_run avail= 1345MB
+lvp_run rc=0 PASS=473 FAIL=0
+before lvp_threshold avail= 1334MB
+lvp_threshold rc=0 PASS=71 FAIL=0
+before lvp_pcwindow avail= 1270MB
+lvp_pcwindow rc=0 PASS=79 FAIL=0
+before lvp_invalid-config avail= 1267MB
+lvp_invalid-config rc=0 PASS=37 FAIL=0
+before lvp_confidence avail= 1268MB
+lvp_confidence rc=0 PASS=57 FAIL=0
+before lvp_alias avail= 1268MB
+lvp_alias rc=0 PASS=55 FAIL=0
+done lvp
+before bypass_config avail= 1268MB
+bypass_config rc=0 PASS=19 FAIL=0
+before bypass_classify avail= 1268MB
+bypass_classify rc=0 PASS=23 FAIL=0
+before bypass_store avail= 1268MB
+bypass_store rc=0 PASS=17 FAIL=0
+before bypass_discard avail= 1269MB
+bypass_discard rc=0 PASS=16 FAIL=0
+before bypass_fault avail= 1269MB
+bypass_fault rc=0 PASS=16 FAIL=0
+before bypass_syscall avail= 1269MB
+bypass_syscall rc=0 PASS=21 FAIL=0
+before bypass_atomic avail= 1269MB
+bypass_atomic rc=0 PASS=19 FAIL=0
+before bypass_abandon avail= 1269MB
+bypass_abandon rc=0 PASS=17 FAIL=0
+before bypass_order avail= 1269MB
+bypass_order rc=0 PASS=16 FAIL=0
+before bypass_sub avail= 1269MB
+bypass_sub rc=0 PASS=22 FAIL=0
+before bypass_split avail= 1259MB
+bypass_split rc=0 PASS=17 FAIL=0
+before bypass_fp avail= 1259MB
+bypass_fp rc=0 PASS=20 FAIL=0
+before bypass_synonym avail= 1259MB
+bypass_synonym rc=0 PASS=18 FAIL=0
+before bypass_special avail= 1259MB
+bypass_special rc=0 PASS=18 FAIL=0
+before bypass_syscall-negative avail= 1259MB
+bypass_syscall-negative rc=0 PASS=11 FAIL=0
+before bypass_latency avail= 1259MB
+bypass_latency rc=0 PASS=19 FAIL=0
+before bypass_lvp avail= 1253MB
+bypass_lvp rc=0 PASS=8 FAIL=0
+done bypass
+before sou avail= 1245MB
+sou rc=0 PASS=17 FAIL=0
+done sou
+done hard

@@ -1,0 +1,99 @@
+align np: exit status 0
+align off: exit status 0
+align train: exit status 0
+align cand: exit status 0
+PASS  align: every mode exits 0 ({'np': 0, 'off': 0, 'train': 0, 'cand': 0})
+PASS  align: identical output in every mode (524304060)
+PASS  align: committed instruction stream and values identical to NO-PREDICTION in every mode (2611 instructions)
+INFO  align: ROI/whole-run numCycles (information only) {'np': 6254, 'off': 6254, 'train': 6254, 'cand': 6254}
+PASS  align np: no architectural fault (0)
+PASS  align np: no early fault (control: 0)
+PASS  align off: no architectural fault (0)
+PASS  align off: the early faults (60) are all C's, on 60 instances that were then executed at the head
+PASS  align off: each early-faulting C committed at the head and published no forwarding record (0 violations)
+PASS  align off: ASTRA never trained C on a misaligned (provisional) base: 60 updates of C, 0 misaligned
+PASS  align off: no early-faulting C was bypassed (0 bypasses of C overall)
+PASS  align off window 0: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  align off window 0: evaluated 160 + carry-in 0 == resolved 160 + in flight 0
+PASS  align off window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  align off window 0: LVP consumers by outcome sum to the LVP count (0)
+PASS  align off window 0: LVP speculative-load identity holds
+PASS  align off window 0: V-ASTRA forwarding identity holds
+PASS  align off window 1: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  align off window 1: evaluated 160 + carry-in 0 == resolved 160 + in flight 0
+PASS  align off window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  align off window 1: LVP consumers by outcome sum to the LVP count (0)
+PASS  align off window 1: LVP speculative-load identity holds
+PASS  align off window 1: V-ASTRA forwarding identity holds
+PASS  align off: no provisional base ({'provisionalBases': 0, 'provisionalValidated': 0, 'provisionalDropped': 0})
+PASS  align off: every consumer has at most one accepted source (0 accepted, 0 violations)
+PASS  align off: the LVP consumers are exactly the loads LVP accepted (0)
+PASS  align off: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  align off: no consumer was served by both sources
+PASS  align off: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 2224 decisions (0 violations [])
+PASS  align off: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  align off: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  align off: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  align off: recovery ordering: 0 wrong used predictions, each with one redirect, every consumer accepted before the validation, never handled or committed and discarded; 0 bypassed consumers (0 in the strict order bypass <= validation <= redirect <= discard) (0 violations [])
+PASS  align off: each of the 238 evaluated consumers has exactly one outcome (0 violations)
+PASS  align off: each outcome names the source the consumer was accepted with (0 violations)
+PASS  align train: no architectural fault (0)
+PASS  align train: the early faults (60) are all C's, on 60 instances that were then executed at the head
+PASS  align train: each early-faulting C committed at the head and published no forwarding record (0 violations)
+PASS  align train: ASTRA never trained C on a misaligned (provisional) base: 60 updates of C, 0 misaligned
+PASS  align train: no early-faulting C was bypassed (0 bypasses of C overall)
+PASS  align train window 0: provisional bases 40 + carry-in 0 == validated 0 + dropped 40 + in flight 0
+PASS  align train window 0: evaluated 160 + carry-in 0 == resolved 160 + in flight 0
+PASS  align train window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  align train window 0: LVP consumers by outcome sum to the LVP count (0)
+PASS  align train window 0: LVP speculative-load identity holds
+PASS  align train window 0: V-ASTRA forwarding identity holds
+PASS  align train window 1: provisional bases 40 + carry-in 0 == validated 0 + dropped 40 + in flight 0
+PASS  align train window 1: evaluated 160 + carry-in 0 == resolved 160 + in flight 0
+PASS  align train window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  align train window 1: LVP consumers by outcome sum to the LVP count (0)
+PASS  align train window 1: LVP speculative-load identity holds
+PASS  align train window 1: V-ASTRA forwarding identity holds
+PASS  align train: the provisional base of every early-faulting attempt was dropped ({'provisionalBases': 80, 'provisionalValidated': 0, 'provisionalDropped': 80}, 60 early faults)
+PASS  align train: every consumer has at most one accepted source (0 accepted, 0 violations)
+PASS  align train: the LVP consumers are exactly the loads LVP accepted (0)
+PASS  align train: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  align train: no consumer was served by both sources
+PASS  align train: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 2224 decisions (0 violations [])
+PASS  align train: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  align train: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  align train: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  align train: recovery ordering: 0 wrong used predictions, each with one redirect, every consumer accepted before the validation, never handled or committed and discarded; 0 bypassed consumers (0 in the strict order bypass <= validation <= redirect <= discard) (0 violations [])
+PASS  align train: each of the 238 evaluated consumers has exactly one outcome (0 violations)
+PASS  align train: each outcome names the source the consumer was accepted with (0 violations)
+PASS  align cand: no architectural fault (0)
+PASS  align cand: the early faults (60) are all C's, on 60 instances that were then executed at the head
+PASS  align cand: each early-faulting C committed at the head and published no forwarding record (0 violations)
+PASS  align cand: ASTRA never trained C on a misaligned (provisional) base: 60 updates of C, 0 misaligned
+PASS  align cand: no early-faulting C was bypassed (0 bypasses of C overall)
+PASS  align cand window 0: provisional bases 40 + carry-in 0 == validated 0 + dropped 40 + in flight 0
+PASS  align cand window 0: evaluated 160 + carry-in 0 == resolved 160 + in flight 0
+PASS  align cand window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  align cand window 0: LVP consumers by outcome sum to the LVP count (0)
+PASS  align cand window 0: LVP speculative-load identity holds
+PASS  align cand window 0: V-ASTRA forwarding identity holds
+PASS  align cand window 1: provisional bases 40 + carry-in 0 == validated 0 + dropped 40 + in flight 0
+PASS  align cand window 1: evaluated 160 + carry-in 0 == resolved 160 + in flight 0
+PASS  align cand window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  align cand window 1: LVP consumers by outcome sum to the LVP count (0)
+PASS  align cand window 1: LVP speculative-load identity holds
+PASS  align cand window 1: V-ASTRA forwarding identity holds
+PASS  align cand: the provisional base of every early-faulting attempt was dropped ({'provisionalBases': 80, 'provisionalValidated': 0, 'provisionalDropped': 80}, 60 early faults)
+PASS  align cand: every consumer has at most one accepted source (0 accepted, 0 violations)
+PASS  align cand: the LVP consumers are exactly the loads LVP accepted (0)
+PASS  align cand: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  align cand: no consumer was served by both sources
+PASS  align cand: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 2224 decisions (0 violations [])
+PASS  align cand: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  align cand: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  align cand: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  align cand: recovery ordering: 0 wrong used predictions, each with one redirect, every consumer accepted before the validation, never handled or committed and discarded; 0 bypassed consumers (0 in the strict order bypass <= validation <= redirect <= discard) (0 violations [])
+PASS  align cand: each of the 238 evaluated consumers has exactly one outcome (0 violations)
+PASS  align cand: each outcome names the source the consumer was accepted with (0 violations)
+align-one: 0 failure(s)
+rc=0

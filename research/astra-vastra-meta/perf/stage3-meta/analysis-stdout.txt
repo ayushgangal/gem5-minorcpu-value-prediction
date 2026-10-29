@@ -1,0 +1,50 @@
+repeat of stable/np: 34547 vs 34547
+workload    mode     median       min       max  spread     red% ins= ck= s2d= | meta: eval va lvp none pend over | fwdAdm
+stable      np        34547     34547     34547     0.0      0.0 True True True |       | 
+stable      lv        24047     24047     24047     0.0    30.39 True True True |       | 
+stable      va         5043      5043      5043     0.0     85.4 True True True |       | 0
+stable      meta       5043      5043      5043     0.0     85.4 True True  | 200 0 0 200 0 0 | 0
+randbase    np        35608     35608     35608     0.0      0.0 True True True |       | 
+randbase    lv        30620     30620     30620     0.0    14.01 True True True |       | 
+randbase    va        18249     18249     18249     0.0    48.75 True True True |       | 0
+randbase    meta      24828     24828     24828     0.0    30.27 True True  | 746 0 386 360 0 0 | 0
+altvalue    np        31344     31344     31344     0.0      0.0 True True True |       | 
+altvalue    lv        25944     25944     25944     0.0    17.23 True True True |       | 
+altvalue    va        12819     12819     12819     0.0     59.1 True True True |       | 0
+altvalue    meta      12819     12819     12819     0.0     59.1 True True  | 200 0 0 200 0 0 | 0
+vcmiss      np        31144     31144     31144     0.0      0.0 True True True |       | 
+vcmiss      lv        24944     24944     24944     0.0    19.91 True True True |       | 
+vcmiss      va        31144     31144     31144     0.0      0.0 True True True |       | 0
+vcmiss      meta      24944     24944     24944     0.0    19.91 True True  | 800 0 600 200 0 0 | 0
+stableflip  np        32151     32151     32151     0.0      0.0 True True  |       | 
+stableflip  lv        26831     26831     26831     0.0    16.55 True True  |       | 
+stableflip  va        12912     12912     12912     0.0    59.84 True True  |       | 0
+stableflip  meta      13039     13039     13039     0.0    59.44 True True  | 218 0 12 206 0 0 | 0
+vcflip      np        32752     32752     32752     0.0      0.0 True True  |       | 
+vcflip      lv        24046     24046     24046     0.0    26.58 True True  |       | 
+vcflip      va        32699     32699     32699     0.0     0.16 True True  |       | 0
+vcflip      meta      24046     24046     24046     0.0    26.58 True True  | 805 0 593 212 0 0 | 0
+none        np        37837     37837     37837     0.0      0.0 True True  |       | 
+none        lv        37837     37837     37837     0.0      0.0 True True  |       | 
+none        va        30810     30810     30810     0.0    18.57 True True  |       | 0
+none        meta      30810     30810     30810     0.0    18.57 True True  | 566 0 0 566 0 0 | 0
+fwdcold     np        55141     55141     55141     0.0      0.0 True True  |       | 
+fwdcold     lv        55141     55141     55141     0.0      0.0 True True  |       | 
+fwdcold     va        34003     34003     34003     0.0    38.33 True True  |       | 188
+fwdcold     meta      34003     34003     34003     0.0    38.33 True True  | 200 188 0 12 0 0 | 188
+mixed       np        86491     86491     86491     0.0      0.0 True True  |       | 
+mixed       lv        79825     79825     79825     0.0     7.71 True True  |       | 
+mixed       va        65054     65054     65054     0.0    24.79 True True  |       | 188
+mixed       meta      59505     59505     59505     0.0     31.2 True True  | 1000 188 600 212 0 0 | 188
+pdstore     np        33748     33748     33748     0.0      0.0 True True  |       | 
+pdstore     lv        25447     25447     25447     0.0     24.6 True True  |       | 
+pdstore     va        25123     25123     25123     0.0    25.56 True True  |       | 0
+pdstore     meta      25123     25123     25123     0.0    25.56 True True  | 3 0 3 0 0 0 | 0
+fwdboth     np        28908     28891     28908   0.059      0.0 True True  |       | 
+fwdboth     lv        28908     28891     28908   0.059      0.0 True True  |       | 
+fwdboth     va        28405     28398     28405   0.025     1.74 True True  |       | 400
+fwdboth     meta      28405     28398     28405   0.025     1.74 True True  | 600 400 0 200 0 400 | 400
+fwdflip     np        28979     28979     29023   0.152      0.0 True True  |       | 
+fwdflip     lv        28979     28979     29023   0.152      0.0 True True  |       | 
+fwdflip     va        28755     28755     28755     0.0     0.77 True True  |       | 394
+fwdflip     meta      28755     28755     28755     0.0     0.77 True True  | 600 394 0 206 0 388 | 394

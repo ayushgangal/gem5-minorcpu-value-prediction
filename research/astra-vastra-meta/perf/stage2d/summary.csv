@@ -1,0 +1,17 @@
+workload,mode,runs,roi_cycles_median,roi_cycles_min,roi_cycles_max,spread_percent,cycles_per_lap,cycle_reduction_percent_median,reduction_min_over_repeats,reduction_max_over_repeats,simInsts,insts_equal_to_np,checksum,checksum_equal_to_np,exe_sha256,dcache.ReadReq.hits::total,dcache.ReadReq.misses::total,l2.overallMisses::total,lvp.confidentPredictions,lvp.correct,lvp.incorrect,lvp.specLoadsIssued,lvp.specLoadsCommitted,lvp.mispredictSquashes,vastra.candidates,vastra.syntheticResponses,vastra.fwdPublished,vastra.fwdAdmitted,vastra.baseWrong,vastra.fbTagMiss
+stable,np,5,34547,34547,34547,0.0,172.74,0.0,0.0,0.0,7248,True,5726622900,True,2caf18d6ecc424cc,,800,,,,,,,,,,,,,
+stable,lv,5,24047,24047,24047,0.0,120.23,30.39,30.39,30.39,7248,True,5726622900,True,2caf18d6ecc424cc,,800,,801,800,0,600,600,0,,,,,,
+stable,va,5,5043,5043,5043,0.0,25.21,85.4,85.4,85.4,7248,True,5726622900,True,2caf18d6ecc424cc,,,,,,,,,,800,800,800,0,0,0
+randbase,np,5,35608,35608,35608,0.0,178.04,0.0,0.0,0.0,17793,True,37223049900,True,871b0c5da5710b1e,,800,,,,,,,,,,,,,
+randbase,lv,5,30620,30620,30620,0.0,153.1,14.01,14.01,14.01,17793,True,37223049900,True,871b0c5da5710b1e,,800,,800,800,0,429,429,0,,,,,,
+randbase,va,5,18249,18249,18249,0.0,91.25,48.75,48.75,48.75,17793,True,37223049900,True,871b0c5da5710b1e,,205,,,,,,,,595,595,595,0,205,0
+altvalue,np,5,31344,31344,31344,0.0,156.72,0.0,0.0,0.0,9057,True,183251932800,True,15a15168b25709ea,1,800,,,,,,,,,,,,,
+altvalue,lv,5,25944,25944,25944,0.0,129.72,17.23,17.23,17.23,9057,True,183251932800,True,15a15168b25709ea,1,800,,600,600,0,400,400,0,,,,,,
+altvalue,va,5,12819,12819,12819,0.0,64.09,59.1,59.1,59.1,9057,True,183251932800,True,15a15168b25709ea,,,,,,,,,,801,801,801,0,0,0
+vcmiss,np,5,31144,31144,31144,0.0,155.72,0.0,0.0,0.0,11748,True,97352591700,True,2c76aeb2e58de28e,,800,,,,,,,,,,,,,
+vcmiss,lv,5,24944,24944,24944,0.0,124.72,19.91,19.91,19.91,11748,True,97352591700,True,2c76aeb2e58de28e,,800,,800,800,0,600,600,0,,,,,,
+vcmiss,va,5,31144,31144,31144,0.0,155.72,0.0,0.0,0.0,11748,True,97352591700,True,2c76aeb2e58de28e,,800,,,,,,,,800,0,0,0,0,800
+stable,hybrid,0,unavailable (META not implemented),,,,,,,,,,,,,,,,,,,,,,,,,,,
+randbase,hybrid,0,unavailable (META not implemented),,,,,,,,,,,,,,,,,,,,,,,,,,,
+altvalue,hybrid,0,unavailable (META not implemented),,,,,,,,,,,,,,,,,,,,,,,,,,,
+vcmiss,hybrid,0,unavailable (META not implemented),,,,,,,,,,,,,,,,,,,,,,,,,,,

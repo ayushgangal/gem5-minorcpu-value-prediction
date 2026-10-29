@@ -1,0 +1,25 @@
+PASS  meta-alone: rejected: enableMeta requires
+PASS  meta-no-lvp: rejected: enableMeta requires
+PASS  meta-lvp-no-specaddr: rejected: enableMeta requires
+PASS  meta-no-forwarding: rejected: enableMeta requires
+PASS  meta-no-bypass: rejected: requires
+PASS  meta-no-release: rejected: requires
+PASS  meta-no-astra: rejected: requires
+PASS  meta-skip-flush: rejected: must not be combined
+PASS  meta-skip-scan: rejected: must not be combined
+PASS  two-cpu: rejected: need exactly one CPU
+PASS  meta-ok: accepted
+PASS  meta-ok-window: accepted
+PASS  meta-verify: rejected: mutually exclusive
+PASS  astra-lvp-without-meta: rejected: metaAstraLvpLoads requires enableMeta
+PASS  astra-lvp-candidate: accepted
+PASS  astra-lvp-train: accepted
+PASS  astra-lvp-bad-value: rejected: 
+PASS  metaAstraLvpLoads defaults to off (config.ini)
+PASS  np: accepted
+PASS  lvp-only: accepted
+PASS  lvp-spec: accepted
+PASS  vastra-only: accepted
+PASS  vastra-fwd: accepted
+PASS  fwd-and-lvpspec-without-meta: rejected: mutually exclusive
+PASS  enableMeta is false by default and true in the META configuration (config.ini)

@@ -1,0 +1,9 @@
+PASS  selftest: the original trace passes and has wrong used predictions with bypassed consumers ({'wrong_used': 3, 'consumers_bypassed': 3, 'strict_order': 3, 'execute_trace': True}, 0 problems)
+PASS  selftest: a wrong used prediction with a bypassed consumer exists
+PASS  selftest: the check detects: no recovery redirect (1 problems, e.g. [('wrong used prediction: 0 redirects', 15148)])
+PASS  selftest: the check detects: consumer response handled instead of discarded (1 problems, e.g. [('consumer handled a response or committed', 15149)])
+PASS  selftest: the check detects: consumer never discarded (1 problems, e.g. [('consumer never discarded', 15149)])
+PASS  selftest: the check detects: consumer accepted after the validation (1 problems, e.g. [('consumer accepted after the validation', 15149)])
+PASS  selftest: the check detects: redirect before the validation (1 problems, e.g. [('redirect before the validation', 15148)])
+PASS  selftest: the check detects: redirect for a producer that was never validated (1 problems, e.g. [('redirect for an unvalidated producer', 999999999)])
+selftest: 0 failure(s)

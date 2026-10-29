@@ -1,0 +1,12 @@
+stable np 34547 34547 34547 red% 0.0 insts== True ck== True | lvp conf  corr  inc  spec  sq  | va cand  syn  fwd  bw  rmiss 800 l2m 
+stable lv 24047 24047 24047 red% 30.39 insts== True ck== True | lvp conf 801 corr 800 inc 0 spec 600 sq 0 | va cand  syn  fwd  bw  rmiss 800 l2m 
+stable va 5043 5043 5043 red% 85.4 insts== True ck== True | lvp conf  corr  inc  spec  sq  | va cand 800 syn 800 fwd 0 bw 0 rmiss  l2m 
+randbase np 35608 35608 35608 red% 0.0 insts== True ck== True | lvp conf  corr  inc  spec  sq  | va cand  syn  fwd  bw  rmiss 800 l2m 
+randbase lv 30620 30620 30620 red% 14.01 insts== True ck== True | lvp conf 800 corr 800 inc 0 spec 429 sq 0 | va cand  syn  fwd  bw  rmiss 800 l2m 
+randbase va 18249 18249 18249 red% 48.75 insts== True ck== True | lvp conf  corr  inc  spec  sq  | va cand 595 syn 595 fwd 0 bw 205 rmiss 205 l2m 
+altvalue np 31344 31344 31344 red% 0.0 insts== True ck== True | lvp conf  corr  inc  spec  sq  | va cand  syn  fwd  bw  rmiss 800 l2m 
+altvalue lv 25944 25944 25944 red% 17.23 insts== True ck== True | lvp conf 600 corr 600 inc 0 spec 400 sq 0 | va cand  syn  fwd  bw  rmiss 800 l2m 
+altvalue va 12819 12819 12819 red% 59.1 insts== True ck== True | lvp conf  corr  inc  spec  sq  | va cand 801 syn 801 fwd 0 bw 0 rmiss  l2m 
+vcmiss np 31144 31144 31144 red% 0.0 insts== True ck== True | lvp conf  corr  inc  spec  sq  | va cand  syn  fwd  bw  rmiss 800 l2m 
+vcmiss lv 24944 24944 24944 red% 19.91 insts== True ck== True | lvp conf 800 corr 800 inc 0 spec 600 sq 0 | va cand  syn  fwd  bw  rmiss 800 l2m 
+vcmiss va 31144 31144 31144 red% 0.0 insts== True ck== True | lvp conf  corr  inc  spec  sq  | va cand 800 syn 0 fwd 0 bw 0 rmiss 800 l2m 

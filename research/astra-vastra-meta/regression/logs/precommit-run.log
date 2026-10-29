@@ -1,0 +1,9 @@
+trim trailing whitespace.................................................Passed
+fix end of files.........................................................Passed
+check json...........................................(no files to check)Skipped
+check yaml...........................................(no files to check)Skipped
+check for added large files..............................................Passed
+mixed line ending........................................................Passed
+check for case conflicts.................................................Passed
+black....................................................................Passed
+gem5 style checker.......................................................Passed

@@ -1,0 +1,421 @@
+k3 np: exit status 0
+k3 off: exit status 0
+k3 train: exit status 0
+k3 cand: exit status 0
+PASS  k3: every mode exits 0 ({'np': 0, 'off': 0, 'train': 0, 'cand': 0})
+PASS  k3: identical output in every mode (85517568640)
+PASS  k3: committed instruction stream and values identical to NO-PREDICTION in every mode (5012 instructions)
+INFO  k3: ROI/whole-run numCycles (information only) {'np': 16101, 'off': 6576, 'train': 6473, 'cand': 6409}
+PASS  k3 off: every consumer has at most one accepted source (8 accepted, 0 violations)
+PASS  k3 off: the LVP consumers are exactly the loads LVP accepted (8)
+PASS  k3 off: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k3 off: no consumer was served by both sources
+PASS  k3 off: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 867 decisions (0 violations [])
+PASS  k3 off: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k3 off: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k3 off: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k3 off: each of the 156 evaluated consumers has exactly one outcome (0 violations)
+PASS  k3 off: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k3 off window 0: evaluated 109 + carry-in 0 == resolved 109 + in flight 0
+PASS  k3 off window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k3 off window 0: LVP consumers by outcome sum to the LVP count (6)
+PASS  k3 off window 0: LVP speculative-load identity holds
+PASS  k3 off window 0: V-ASTRA forwarding identity holds
+PASS  k3 off window 0: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k3 off window 1: evaluated 109 + carry-in 0 == resolved 109 + in flight 0
+PASS  k3 off window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k3 off window 1: LVP consumers by outcome sum to the LVP count (6)
+PASS  k3 off window 1: LVP speculative-load identity holds
+PASS  k3 off window 1: V-ASTRA forwarding identity holds
+PASS  k3 off window 1: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k3 train: every consumer has at most one accepted source (8 accepted, 0 violations)
+PASS  k3 train: the LVP consumers are exactly the loads LVP accepted (8)
+PASS  k3 train: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k3 train: no consumer was served by both sources
+PASS  k3 train: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 817 decisions (0 violations [])
+PASS  k3 train: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k3 train: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k3 train: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k3 train: each of the 152 evaluated consumers has exactly one outcome (0 violations)
+PASS  k3 train: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k3 train window 0: evaluated 106 + carry-in 0 == resolved 106 + in flight 0
+PASS  k3 train window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k3 train window 0: LVP consumers by outcome sum to the LVP count (6)
+PASS  k3 train window 0: LVP speculative-load identity holds
+PASS  k3 train window 0: V-ASTRA forwarding identity holds
+PASS  k3 train window 0: provisional bases 6 + carry-in 0 == validated 6 + dropped 0 + in flight 0
+PASS  k3 train window 1: evaluated 106 + carry-in 0 == resolved 106 + in flight 0
+PASS  k3 train window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k3 train window 1: LVP consumers by outcome sum to the LVP count (6)
+PASS  k3 train window 1: LVP speculative-load identity holds
+PASS  k3 train window 1: V-ASTRA forwarding identity holds
+PASS  k3 train window 1: provisional bases 6 + carry-in 0 == validated 6 + dropped 0 + in flight 0
+PASS  k3 cand: every consumer has at most one accepted source (4 accepted, 0 violations)
+PASS  k3 cand: the LVP consumers are exactly the loads LVP accepted (4)
+PASS  k3 cand: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k3 cand: no consumer was served by both sources
+PASS  k3 cand: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 789 decisions (0 violations [])
+PASS  k3 cand: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k3 cand: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k3 cand: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k3 cand: each of the 152 evaluated consumers has exactly one outcome (0 violations)
+PASS  k3 cand: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k3 cand window 0: evaluated 106 + carry-in 0 == resolved 106 + in flight 0
+PASS  k3 cand window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k3 cand window 0: LVP consumers by outcome sum to the LVP count (3)
+PASS  k3 cand window 0: LVP speculative-load identity holds
+PASS  k3 cand window 0: V-ASTRA forwarding identity holds
+PASS  k3 cand window 0: provisional bases 3 + carry-in 0 == validated 3 + dropped 0 + in flight 0
+PASS  k3 cand window 1: evaluated 106 + carry-in 0 == resolved 106 + in flight 0
+PASS  k3 cand window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k3 cand window 1: LVP consumers by outcome sum to the LVP count (3)
+PASS  k3 cand window 1: LVP speculative-load identity holds
+PASS  k3 cand window 1: V-ASTRA forwarding identity holds
+PASS  k3 cand window 1: provisional bases 3 + carry-in 0 == validated 3 + dropped 0 + in flight 0
+PASS  k3: off creates no provisional base (current META unchanged)
+PASS  k3 train: 12 provisional bases, 12 validated at the load's response, 0 dropped (squashed or faulted first)
+PASS  k3 train: no LVP-served load publishes a V-ASTRA record (8 LVP loads, 0 records)
+PASS  k3 train: no LVP-served load is a V-ASTRA candidate (0)
+INFO  k3 train: provisional 12, LVP loads 8, candidates among them 0, ASTRA bases unavailable 0 (off 12), candidates 788 (off 782), synthetic responses 788 (off 782), recoveries 0 (off 0)
+PASS  k3 cand: 6 provisional bases, 6 validated at the load's response, 0 dropped (squashed or faulted first)
+PASS  k3 cand: no LVP-served load publishes a V-ASTRA record (4 LVP loads, 0 records)
+PASS  k3 cand: every LVP-served V-ASTRA candidate has ASTRA's predicted base equal to the LVP operand it used (4 candidates)
+INFO  k3 cand: provisional 6, LVP loads 4, candidates among them 4, ASTRA bases unavailable 0 (off 12), candidates 800 (off 782), synthetic responses 800 (off 782), recoveries 0 (off 0)
+astra-lvp-one: 0 failure(s)
+k4 np: exit status 0
+k4 off: exit status 0
+k4 train: exit status 0
+k4 cand: exit status 0
+PASS  k4: every mode exits 0 ({'np': 0, 'off': 0, 'train': 0, 'cand': 0})
+PASS  k4: identical output in every mode (45431209460)
+PASS  k4: committed instruction stream and values identical to NO-PREDICTION in every mode (6558 instructions)
+INFO  k4: ROI/whole-run numCycles (information only) {'np': 16402, 'off': 12190, 'train': 12190, 'cand': 12190}
+PASS  k4 off: every consumer has at most one accepted source (403 accepted, 0 violations)
+PASS  k4 off: the LVP consumers are exactly the loads LVP accepted (403)
+PASS  k4 off: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k4 off: no consumer was served by both sources
+PASS  k4 off: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 6088 decisions (0 violations [])
+PASS  k4 off: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k4 off: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k4 off: every LVP recovery redirect (4) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k4 off: each of the 563 evaluated consumers has exactly one outcome (0 violations)
+PASS  k4 off: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k4 off window 0: evaluated 402 + carry-in 0 == resolved 402 + in flight 0
+PASS  k4 off window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k4 off window 0: LVP consumers by outcome sum to the LVP count (296)
+PASS  k4 off window 0: LVP speculative-load identity holds
+PASS  k4 off window 0: V-ASTRA forwarding identity holds
+PASS  k4 off window 0: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k4 off window 1: evaluated 402 + carry-in 0 == resolved 402 + in flight 0
+PASS  k4 off window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k4 off window 1: LVP consumers by outcome sum to the LVP count (296)
+PASS  k4 off window 1: LVP speculative-load identity holds
+PASS  k4 off window 1: V-ASTRA forwarding identity holds
+PASS  k4 off window 1: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k4 train: every consumer has at most one accepted source (403 accepted, 0 violations)
+PASS  k4 train: the LVP consumers are exactly the loads LVP accepted (403)
+PASS  k4 train: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k4 train: no consumer was served by both sources
+PASS  k4 train: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 6088 decisions (0 violations [])
+PASS  k4 train: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k4 train: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k4 train: every LVP recovery redirect (4) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k4 train: each of the 563 evaluated consumers has exactly one outcome (0 violations)
+PASS  k4 train: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k4 train window 0: evaluated 402 + carry-in 0 == resolved 402 + in flight 0
+PASS  k4 train window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k4 train window 0: LVP consumers by outcome sum to the LVP count (296)
+PASS  k4 train window 0: LVP speculative-load identity holds
+PASS  k4 train window 0: V-ASTRA forwarding identity holds
+PASS  k4 train window 0: provisional bases 296 + carry-in 0 == validated 293 + dropped 3 + in flight 0
+PASS  k4 train window 1: evaluated 402 + carry-in 0 == resolved 402 + in flight 0
+PASS  k4 train window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k4 train window 1: LVP consumers by outcome sum to the LVP count (296)
+PASS  k4 train window 1: LVP speculative-load identity holds
+PASS  k4 train window 1: V-ASTRA forwarding identity holds
+PASS  k4 train window 1: provisional bases 296 + carry-in 0 == validated 293 + dropped 3 + in flight 0
+PASS  k4 cand: every consumer has at most one accepted source (403 accepted, 0 violations)
+PASS  k4 cand: the LVP consumers are exactly the loads LVP accepted (403)
+PASS  k4 cand: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k4 cand: no consumer was served by both sources
+PASS  k4 cand: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 6088 decisions (0 violations [])
+PASS  k4 cand: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k4 cand: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k4 cand: every LVP recovery redirect (4) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k4 cand: each of the 563 evaluated consumers has exactly one outcome (0 violations)
+PASS  k4 cand: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k4 cand window 0: evaluated 402 + carry-in 0 == resolved 402 + in flight 0
+PASS  k4 cand window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k4 cand window 0: LVP consumers by outcome sum to the LVP count (296)
+PASS  k4 cand window 0: LVP speculative-load identity holds
+PASS  k4 cand window 0: V-ASTRA forwarding identity holds
+PASS  k4 cand window 0: provisional bases 296 + carry-in 0 == validated 293 + dropped 3 + in flight 0
+PASS  k4 cand window 1: evaluated 402 + carry-in 0 == resolved 402 + in flight 0
+PASS  k4 cand window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k4 cand window 1: LVP consumers by outcome sum to the LVP count (296)
+PASS  k4 cand window 1: LVP speculative-load identity holds
+PASS  k4 cand window 1: V-ASTRA forwarding identity holds
+PASS  k4 cand window 1: provisional bases 296 + carry-in 0 == validated 293 + dropped 3 + in flight 0
+PASS  k4: off creates no provisional base (current META unchanged)
+PASS  k4 train: 592 provisional bases, 586 validated at the load's response, 6 dropped (squashed or faulted first)
+PASS  k4 train: no LVP-served load publishes a V-ASTRA record (403 LVP loads, 0 records)
+PASS  k4 train: no LVP-served load is a V-ASTRA candidate (0)
+INFO  k4 train: provisional 592, LVP loads 403, candidates among them 0, ASTRA bases unavailable 0 (off 586), candidates 214 (off 202), synthetic responses 8 (off 8), recoveries 6 (off 6)
+PASS  k4 cand: 592 provisional bases, 586 validated at the load's response, 6 dropped (squashed or faulted first)
+PASS  k4 cand: no LVP-served load publishes a V-ASTRA record (403 LVP loads, 0 records)
+PASS  k4 cand: every LVP-served V-ASTRA candidate has ASTRA's predicted base equal to the LVP operand it used (403 candidates)
+INFO  k4 cand: provisional 592, LVP loads 403, candidates among them 403, ASTRA bases unavailable 0 (off 586), candidates 806 (off 202), synthetic responses 8 (off 8), recoveries 6 (off 6)
+astra-lvp-one: 0 failure(s)
+k5 np: exit status 0
+k5 off: exit status 0
+k5 train: exit status 0
+k5 cand: exit status 0
+PASS  k5: every mode exits 0 ({'np': 0, 'off': 0, 'train': 0, 'cand': 0})
+PASS  k5: identical output in every mode (2957813)
+PASS  k5: committed instruction stream and values identical to NO-PREDICTION in every mode (15659 instructions)
+INFO  k5: ROI/whole-run numCycles (information only) {'np': 19004, 'off': 15410, 'train': 15410, 'cand': 15410}
+PASS  k5 off: every consumer has at most one accepted source (0 accepted, 0 violations)
+PASS  k5 off: the LVP consumers are exactly the loads LVP accepted (0)
+PASS  k5 off: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k5 off: no consumer was served by both sources
+PASS  k5 off: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 6897 decisions (0 violations [])
+PASS  k5 off: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k5 off: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k5 off: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k5 off: each of the 396 evaluated consumers has exactly one outcome (0 violations)
+PASS  k5 off: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k5 off window 0: evaluated 282 + carry-in 0 == resolved 282 + in flight 0
+PASS  k5 off window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k5 off window 0: LVP consumers by outcome sum to the LVP count (0)
+PASS  k5 off window 0: LVP speculative-load identity holds
+PASS  k5 off window 0: V-ASTRA forwarding identity holds
+PASS  k5 off window 0: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k5 off window 1: evaluated 282 + carry-in 0 == resolved 282 + in flight 0
+PASS  k5 off window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k5 off window 1: LVP consumers by outcome sum to the LVP count (0)
+PASS  k5 off window 1: LVP speculative-load identity holds
+PASS  k5 off window 1: V-ASTRA forwarding identity holds
+PASS  k5 off window 1: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k5 train: every consumer has at most one accepted source (0 accepted, 0 violations)
+PASS  k5 train: the LVP consumers are exactly the loads LVP accepted (0)
+PASS  k5 train: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k5 train: no consumer was served by both sources
+PASS  k5 train: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 6897 decisions (0 violations [])
+PASS  k5 train: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k5 train: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k5 train: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k5 train: each of the 396 evaluated consumers has exactly one outcome (0 violations)
+PASS  k5 train: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k5 train window 0: evaluated 282 + carry-in 0 == resolved 282 + in flight 0
+PASS  k5 train window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k5 train window 0: LVP consumers by outcome sum to the LVP count (0)
+PASS  k5 train window 0: LVP speculative-load identity holds
+PASS  k5 train window 0: V-ASTRA forwarding identity holds
+PASS  k5 train window 0: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k5 train window 1: evaluated 282 + carry-in 0 == resolved 282 + in flight 0
+PASS  k5 train window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k5 train window 1: LVP consumers by outcome sum to the LVP count (0)
+PASS  k5 train window 1: LVP speculative-load identity holds
+PASS  k5 train window 1: V-ASTRA forwarding identity holds
+PASS  k5 train window 1: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k5 cand: every consumer has at most one accepted source (0 accepted, 0 violations)
+PASS  k5 cand: the LVP consumers are exactly the loads LVP accepted (0)
+PASS  k5 cand: the V-ASTRA consumers are exactly the forwarding admissions (0)
+PASS  k5 cand: no consumer was served by both sources
+PASS  k5 cand: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 6897 decisions (0 violations [])
+PASS  k5 cand: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k5 cand: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k5 cand: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k5 cand: each of the 396 evaluated consumers has exactly one outcome (0 violations)
+PASS  k5 cand: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k5 cand window 0: evaluated 282 + carry-in 0 == resolved 282 + in flight 0
+PASS  k5 cand window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k5 cand window 0: LVP consumers by outcome sum to the LVP count (0)
+PASS  k5 cand window 0: LVP speculative-load identity holds
+PASS  k5 cand window 0: V-ASTRA forwarding identity holds
+PASS  k5 cand window 0: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k5 cand window 1: evaluated 282 + carry-in 0 == resolved 282 + in flight 0
+PASS  k5 cand window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (0)
+PASS  k5 cand window 1: LVP consumers by outcome sum to the LVP count (0)
+PASS  k5 cand window 1: LVP speculative-load identity holds
+PASS  k5 cand window 1: V-ASTRA forwarding identity holds
+PASS  k5 cand window 1: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k5: off creates no provisional base (current META unchanged)
+PASS  k5 train: 0 provisional bases, 0 validated at the load's response, 0 dropped (squashed or faulted first)
+PASS  k5 train: no LVP-served load publishes a V-ASTRA record (0 LVP loads, 0 records)
+PASS  k5 train: no LVP-served load is a V-ASTRA candidate (0)
+INFO  k5 train: provisional 0, LVP loads 0, candidates among them 0, ASTRA bases unavailable 0 (off 0), candidates 242 (off 242), synthetic responses 242 (off 242), recoveries 0 (off 0)
+PASS  k5 cand: 0 provisional bases, 0 validated at the load's response, 0 dropped (squashed or faulted first)
+PASS  k5 cand: no LVP-served load publishes a V-ASTRA record (0 LVP loads, 0 records)
+PASS  k5 cand: every LVP-served V-ASTRA candidate has ASTRA's predicted base equal to the LVP operand it used (0 candidates)
+INFO  k5 cand: provisional 0, LVP loads 0, candidates among them 0, ASTRA bases unavailable 0 (off 0), candidates 242 (off 242), synthetic responses 242 (off 242), recoveries 0 (off 0)
+astra-lvp-one: 0 failure(s)
+k7 np: exit status 0
+k7 off: exit status 0
+k7 train: exit status 0
+k7 cand: exit status 0
+PASS  k7: every mode exits 0 ({'np': 0, 'off': 0, 'train': 0, 'cand': 0})
+PASS  k7: identical output in every mode (45663448308)
+PASS  k7: committed instruction stream and values identical to NO-PREDICTION in every mode (10696 instructions)
+INFO  k7: ROI/whole-run numCycles (information only) {'np': 43172, 'off': 29666, 'train': 29666, 'cand': 29666}
+PASS  k7 off: every consumer has at most one accepted source (539 accepted, 0 violations)
+PASS  k7 off: the LVP consumers are exactly the loads LVP accepted (408)
+PASS  k7 off: the V-ASTRA consumers are exactly the forwarding admissions (131)
+PASS  k7 off: no consumer was served by both sources
+PASS  k7 off: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 9274 decisions (0 violations [])
+PASS  k7 off: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k7 off: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k7 off: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k7 off: each of the 700 evaluated consumers has exactly one outcome (0 violations)
+PASS  k7 off: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k7 off window 0: evaluated 500 + carry-in 0 == resolved 500 + in flight 0
+PASS  k7 off window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (94)
+PASS  k7 off window 0: LVP consumers by outcome sum to the LVP count (300)
+PASS  k7 off window 0: LVP speculative-load identity holds
+PASS  k7 off window 0: V-ASTRA forwarding identity holds
+PASS  k7 off window 0: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k7 off window 1: evaluated 500 + carry-in 0 == resolved 500 + in flight 0
+PASS  k7 off window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (94)
+PASS  k7 off window 1: LVP consumers by outcome sum to the LVP count (300)
+PASS  k7 off window 1: LVP speculative-load identity holds
+PASS  k7 off window 1: V-ASTRA forwarding identity holds
+PASS  k7 off window 1: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k7 train: every consumer has at most one accepted source (539 accepted, 0 violations)
+PASS  k7 train: the LVP consumers are exactly the loads LVP accepted (408)
+PASS  k7 train: the V-ASTRA consumers are exactly the forwarding admissions (131)
+PASS  k7 train: no consumer was served by both sources
+PASS  k7 train: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 9274 decisions (0 violations [])
+PASS  k7 train: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k7 train: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k7 train: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k7 train: each of the 700 evaluated consumers has exactly one outcome (0 violations)
+PASS  k7 train: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k7 train window 0: evaluated 500 + carry-in 0 == resolved 500 + in flight 0
+PASS  k7 train window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (94)
+PASS  k7 train window 0: LVP consumers by outcome sum to the LVP count (300)
+PASS  k7 train window 0: LVP speculative-load identity holds
+PASS  k7 train window 0: V-ASTRA forwarding identity holds
+PASS  k7 train window 0: provisional bases 300 + carry-in 0 == validated 300 + dropped 0 + in flight 0
+PASS  k7 train window 1: evaluated 500 + carry-in 0 == resolved 500 + in flight 0
+PASS  k7 train window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (94)
+PASS  k7 train window 1: LVP consumers by outcome sum to the LVP count (300)
+PASS  k7 train window 1: LVP speculative-load identity holds
+PASS  k7 train window 1: V-ASTRA forwarding identity holds
+PASS  k7 train window 1: provisional bases 300 + carry-in 0 == validated 300 + dropped 0 + in flight 0
+PASS  k7 cand: every consumer has at most one accepted source (539 accepted, 0 violations)
+PASS  k7 cand: the LVP consumers are exactly the loads LVP accepted (408)
+PASS  k7 cand: the V-ASTRA consumers are exactly the forwarding admissions (131)
+PASS  k7 cand: no consumer was served by both sources
+PASS  k7 cand: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 9274 decisions (0 violations [])
+PASS  k7 cand: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k7 cand: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k7 cand: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k7 cand: each of the 700 evaluated consumers has exactly one outcome (0 violations)
+PASS  k7 cand: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k7 cand window 0: evaluated 500 + carry-in 0 == resolved 500 + in flight 0
+PASS  k7 cand window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (94)
+PASS  k7 cand window 0: LVP consumers by outcome sum to the LVP count (300)
+PASS  k7 cand window 0: LVP speculative-load identity holds
+PASS  k7 cand window 0: V-ASTRA forwarding identity holds
+PASS  k7 cand window 0: provisional bases 300 + carry-in 0 == validated 300 + dropped 0 + in flight 0
+PASS  k7 cand window 1: evaluated 500 + carry-in 0 == resolved 500 + in flight 0
+PASS  k7 cand window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (94)
+PASS  k7 cand window 1: LVP consumers by outcome sum to the LVP count (300)
+PASS  k7 cand window 1: LVP speculative-load identity holds
+PASS  k7 cand window 1: V-ASTRA forwarding identity holds
+PASS  k7 cand window 1: provisional bases 300 + carry-in 0 == validated 300 + dropped 0 + in flight 0
+PASS  k7: off creates no provisional base (current META unchanged)
+PASS  k7 train: 600 provisional bases, 600 validated at the load's response, 0 dropped (squashed or faulted first)
+PASS  k7 train: no LVP-served load publishes a V-ASTRA record (408 LVP loads, 0 records)
+PASS  k7 train: no LVP-served load is a V-ASTRA candidate (0)
+INFO  k7 train: provisional 600, LVP loads 408, candidates among them 0, ASTRA bases unavailable 0 (off 600), candidates 392 (off 392), synthetic responses 194 (off 194), recoveries 0 (off 0)
+PASS  k7 cand: 600 provisional bases, 600 validated at the load's response, 0 dropped (squashed or faulted first)
+PASS  k7 cand: no LVP-served load publishes a V-ASTRA record (408 LVP loads, 0 records)
+PASS  k7 cand: every LVP-served V-ASTRA candidate has ASTRA's predicted base equal to the LVP operand it used (406 candidates)
+INFO  k7 cand: provisional 600, LVP loads 408, candidates among them 406, ASTRA bases unavailable 0 (off 600), candidates 988 (off 392), synthetic responses 194 (off 194), recoveries 0 (off 0)
+astra-lvp-one: 0 failure(s)
+k10 np: exit status 0
+k10 off: exit status 0
+k10 train: exit status 0
+k10 cand: exit status 0
+PASS  k10: every mode exits 0 ({'np': 0, 'off': 0, 'train': 0, 'cand': 0})
+PASS  k10: identical output in every mode (610188288)
+PASS  k10: committed instruction stream and values identical to NO-PREDICTION in every mode (3178 instructions)
+INFO  k10: ROI/whole-run numCycles (information only) {'np': 14559, 'off': 14409, 'train': 14409, 'cand': 14409}
+PASS  k10 off: every consumer has at most one accepted source (272 accepted, 0 violations)
+PASS  k10 off: the LVP consumers are exactly the loads LVP accepted (0)
+PASS  k10 off: the V-ASTRA consumers are exactly the forwarding admissions (272)
+PASS  k10 off: no consumer was served by both sources
+PASS  k10 off: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 1087 decisions (0 violations [])
+PASS  k10 off: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k10 off: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k10 off: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k10 off: each of the 419 evaluated consumers has exactly one outcome (0 violations)
+PASS  k10 off: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k10 off window 0: evaluated 300 + carry-in 0 == resolved 300 + in flight 0
+PASS  k10 off window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (197)
+PASS  k10 off window 0: LVP consumers by outcome sum to the LVP count (0)
+PASS  k10 off window 0: LVP speculative-load identity holds
+PASS  k10 off window 0: V-ASTRA forwarding identity holds
+PASS  k10 off window 0: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k10 off window 1: evaluated 300 + carry-in 0 == resolved 300 + in flight 0
+PASS  k10 off window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (197)
+PASS  k10 off window 1: LVP consumers by outcome sum to the LVP count (0)
+PASS  k10 off window 1: LVP speculative-load identity holds
+PASS  k10 off window 1: V-ASTRA forwarding identity holds
+PASS  k10 off window 1: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k10 train: every consumer has at most one accepted source (272 accepted, 0 violations)
+PASS  k10 train: the LVP consumers are exactly the loads LVP accepted (0)
+PASS  k10 train: the V-ASTRA consumers are exactly the forwarding admissions (272)
+PASS  k10 train: no consumer was served by both sources
+PASS  k10 train: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 1087 decisions (0 violations [])
+PASS  k10 train: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k10 train: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k10 train: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k10 train: each of the 419 evaluated consumers has exactly one outcome (0 violations)
+PASS  k10 train: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k10 train window 0: evaluated 300 + carry-in 0 == resolved 300 + in flight 0
+PASS  k10 train window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (197)
+PASS  k10 train window 0: LVP consumers by outcome sum to the LVP count (0)
+PASS  k10 train window 0: LVP speculative-load identity holds
+PASS  k10 train window 0: V-ASTRA forwarding identity holds
+PASS  k10 train window 0: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k10 train window 1: evaluated 300 + carry-in 0 == resolved 300 + in flight 0
+PASS  k10 train window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (197)
+PASS  k10 train window 1: LVP consumers by outcome sum to the LVP count (0)
+PASS  k10 train window 1: LVP speculative-load identity holds
+PASS  k10 train window 1: V-ASTRA forwarding identity holds
+PASS  k10 train window 1: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k10 cand: every consumer has at most one accepted source (272 accepted, 0 violations)
+PASS  k10 cand: the LVP consumers are exactly the loads LVP accepted (0)
+PASS  k10 cand: the V-ASTRA consumers are exactly the forwarding admissions (272)
+PASS  k10 cand: no consumer was served by both sources
+PASS  k10 cand: every META decision follows the precedence rule (V-ASTRA validated, else LVP when V-ASTRA is failed or absent, else none; nothing while V-ASTRA is pending) over 1087 decisions (0 violations [])
+PASS  k10 cand: each accepted consumer was decided for that source in the cycle of acceptance (0 violations)
+PASS  k10 cand: every V-ASTRA consumer was admitted after its producer's publication (0 violations)
+PASS  k10 cand: every LVP recovery redirect (0) was caused by a prediction used by an LVP consumer, and no V-ASTRA consumer of that producer was involved (0 violations)
+PASS  k10 cand: each of the 419 evaluated consumers has exactly one outcome (0 violations)
+PASS  k10 cand: each outcome names the source the consumer was accepted with (0 violations)
+PASS  k10 cand window 0: evaluated 300 + carry-in 0 == resolved 300 + in flight 0
+PASS  k10 cand window 0: V-ASTRA consumers by outcome sum to the V-ASTRA count (197)
+PASS  k10 cand window 0: LVP consumers by outcome sum to the LVP count (0)
+PASS  k10 cand window 0: LVP speculative-load identity holds
+PASS  k10 cand window 0: V-ASTRA forwarding identity holds
+PASS  k10 cand window 0: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k10 cand window 1: evaluated 300 + carry-in 0 == resolved 300 + in flight 0
+PASS  k10 cand window 1: V-ASTRA consumers by outcome sum to the V-ASTRA count (197)
+PASS  k10 cand window 1: LVP consumers by outcome sum to the LVP count (0)
+PASS  k10 cand window 1: LVP speculative-load identity holds
+PASS  k10 cand window 1: V-ASTRA forwarding identity holds
+PASS  k10 cand window 1: provisional bases 0 + carry-in 0 == validated 0 + dropped 0 + in flight 0
+PASS  k10: off creates no provisional base (current META unchanged)
+PASS  k10 train: 0 provisional bases, 0 validated at the load's response, 0 dropped (squashed or faulted first)
+PASS  k10 train: no LVP-served load publishes a V-ASTRA record (0 LVP loads, 0 records)
+PASS  k10 train: no LVP-served load is a V-ASTRA candidate (0)
+INFO  k10 train: provisional 0, LVP loads 0, candidates among them 0, ASTRA bases unavailable 0 (off 0), candidates 600 (off 600), synthetic responses 600 (off 600), recoveries 0 (off 0)
+PASS  k10 cand: 0 provisional bases, 0 validated at the load's response, 0 dropped (squashed or faulted first)
+PASS  k10 cand: no LVP-served load publishes a V-ASTRA record (0 LVP loads, 0 records)
+PASS  k10 cand: every LVP-served V-ASTRA candidate has ASTRA's predicted base equal to the LVP operand it used (0 candidates)
+INFO  k10 cand: provisional 0, LVP loads 0, candidates among them 0, ASTRA bases unavailable 0 (off 0), candidates 600 (off 600), synthetic responses 600 (off 600), recoveries 0 (off 0)
+astra-lvp-one: 0 failure(s)
+rc=0
