@@ -1,0 +1,51 @@
+\section{Conclusion}
+
+This project implemented and evaluated value-prediction mechanisms
+in gem5 MinorCPU, including Last Value Prediction (LVP),
+ASTRA-based load-base prediction, a dedicated value cache, and
+guarded V-ASTRA load bypass. It also investigated two
+dependency-handling mechanisms: Design~A releases scoreboard
+dependencies after a successful bypass, while Design~B forwards
+validated values to eligible dependent loads.
+
+The paper's META predictor was adapted to MinorCPU to select
+between LVP and V-ASTRA on a per-consumer basis. Validated
+V-ASTRA values are preferred, while consumers wait when a
+V-ASTRA result is Pending rather than immediately falling back
+to LVP. LVP may be selected when the V-ASTRA outcome has failed
+or is absent and the LVP admission conditions are satisfied. The implementation also introduces experimental
+provisional-base modes that use LVP-derived information for
+ASTRA training and V-ASTRA candidate generation.
+
+Performance measurements on deterministic microbenchmarks show
+that prediction effectiveness depends on workload characteristics.
+META achieves a 31.20\% cycle reduction on mixed,
+outperforming both standalone predictors. However, on
+random base, default META achieves 30.27\%, compared with
+48.75\% for V-ASTRA-only, and it also performs slightly worse
+than V-ASTRA on stable flip. The experimental candidate
+mode improves the random-base reduction to 50.80\%, but this
+benefit is workload-specific and does not generalize across the
+evaluated workloads. These results characterize the tested simulator
+configurations, not application-level speedups. Design~A was
+validated under stall-on-use but not performance-evaluated in
+that configuration, while the contribution of Design~B was not
+isolated from V-ASTRA.
+
+Validation covered predictor behavior, value-cache correctness,
+memory ordering, dependency handling, and misprediction recovery.
+The experiments demonstrated that unused incorrect LVP predictions
+do not require recovery and that V-ASTRA-served consumers do not
+trigger LVP recovery. They also exposed and helped correct a
+provisional-state cleanup defect on early alignment faults.
+
+Overall, this work demonstrates the challenges of integrating
+value prediction into an in-order processor, particularly the
+interactions between speculative operands, address prediction,
+value-cache bypass, memory ordering, dependency tracking, and
+recovery. It provides a basis for further investigation of value
+prediction in MinorCPU. Important next steps include completing
+final-source validation, implementing architectural components
+such as the speculative L0 minicache and LACT, improving provisional
+candidate admission, and evaluating the mechanisms on more
+representative workloads.
