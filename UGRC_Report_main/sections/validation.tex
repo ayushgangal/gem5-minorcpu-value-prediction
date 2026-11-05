@@ -332,8 +332,8 @@ Section~\ref{subsec:meta-integration-recovery-validation}.
 \label{subsubsec:dependency-validation-provenance}
 
 The stall-on-use, Design~A, and Design~B suites reported 17, 255,
-and 275 passing checks, respectively, with no failures. However,
-these suites have not been rerun against the final source revision.
+and 275 passing checks, respectively, with no failures. They also passed in the final regression
+(Section~\ref{subsec:final-regression}).
 The checkers provide directed, lifecycle, and differential evidence,
 but are not independent proofs of correctness. In particular,
 Design~B validation primarily demonstrates forwarding correctness
@@ -546,3 +546,17 @@ bypasses of the faulting load. Repeated retries, post-LSQ faults, and
 translation faults on provisional loads remain untested. The result
 therefore validates the specific early-alignment-fault cleanup path,
 not provisional-state recovery in general.
+
+\subsection{Final Regression}
+\label{subsec:final-regression}
+
+After the last source changes, every suite in this section was rerun
+together on the final source revision. This covered the ASTRA,
+value-cache, V-ASTRA, standalone LVP, load-bypass, stall-on-use,
+Design~A, Design~B, and drain and statistics-reset suites, and all
+five META suites. Every suite passed with no failures, and the check
+counts matched those reported above. The only differences were in the
+META lifecycle and ASTRA--LVP suites, which ran 60 and 216 more checks,
+respectively. All of the extra checks come from two drain and
+statistics-reset workloads that produced more statistics windows, each
+of which adds a set of per-window checks. All of these checks passed.

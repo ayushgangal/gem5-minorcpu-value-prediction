@@ -1,0 +1,78 @@
+commit 233c12dc0e
+gem5.opt sha256 5f7d037c25c6c8cd
+Thursday 05 November 2026 04:16:04 PM IST
+before astra avail=12997MB
+astra rc=0 PASS=78 FAIL=0
+before astra_targeted avail=12995MB
+astra_targeted rc=0 PASS=340 FAIL=0
+before vcache avail=12981MB
+vcache rc=0 PASS=157 FAIL=0
+before vastra avail=12976MB
+vastra rc=0 PASS=276 FAIL=0
+before lvp_run avail=12962MB
+lvp_run rc=0 PASS=473 FAIL=0
+before lvp_threshold avail=19208MB
+lvp_threshold rc=0 PASS=71 FAIL=0
+before lvp_pcwindow avail=19202MB
+lvp_pcwindow rc=0 PASS=79 FAIL=0
+before lvp_invalid-config avail=19195MB
+lvp_invalid-config rc=0 PASS=37 FAIL=0
+before lvp_confidence avail=19193MB
+lvp_confidence rc=0 PASS=57 FAIL=0
+before lvp_alias avail=19192MB
+lvp_alias rc=0 PASS=55 FAIL=0
+before bypass_config avail=19191MB
+bypass_config rc=0 PASS=19 FAIL=0
+before bypass_classify avail=19188MB
+bypass_classify rc=0 PASS=23 FAIL=0
+before bypass_store avail=19186MB
+bypass_store rc=0 PASS=17 FAIL=0
+before bypass_discard avail=19185MB
+bypass_discard rc=0 PASS=16 FAIL=0
+before bypass_fault avail=19184MB
+bypass_fault rc=0 PASS=16 FAIL=0
+before bypass_syscall avail=19184MB
+bypass_syscall rc=0 PASS=21 FAIL=0
+before bypass_atomic avail=19183MB
+bypass_atomic rc=0 PASS=19 FAIL=0
+before bypass_abandon avail=19182MB
+bypass_abandon rc=0 PASS=17 FAIL=0
+before bypass_order avail=19181MB
+bypass_order rc=0 PASS=16 FAIL=0
+before bypass_sub avail=19180MB
+bypass_sub rc=0 PASS=22 FAIL=0
+before bypass_split avail=19178MB
+bypass_split rc=0 PASS=17 FAIL=0
+before bypass_fp avail=19177MB
+bypass_fp rc=0 PASS=20 FAIL=0
+before bypass_synonym avail=19176MB
+bypass_synonym rc=0 PASS=18 FAIL=0
+before bypass_special avail=19174MB
+bypass_special rc=0 PASS=18 FAIL=0
+before bypass_syscall-negative avail=19173MB
+bypass_syscall-negative rc=0 PASS=11 FAIL=0
+before bypass_latency avail=19172MB
+bypass_latency rc=0 PASS=19 FAIL=0
+before bypass_lvp avail=19167MB
+bypass_lvp rc=0 PASS=8 FAIL=0
+before sou avail=19160MB
+sou rc=0 PASS=17 FAIL=0
+before release avail=19154MB
+release driver rc=0
+before forward_config avail=18129MB
+forward_config rc=0 PASS=10 FAIL=0
+before forward avail=18135MB
+forward driver rc=0
+before bypass drain avail=16738MB
+bypass drain driver rc=0
+before meta_config avail=15615MB
+meta_config rc=0 PASS=25 FAIL=0
+before meta_directed avail=15610MB
+meta_directed rc=0 PASS=281 FAIL=0
+before meta_lifecycle avail=15336MB
+meta_lifecycle rc=0 PASS=4685 FAIL=0
+before meta_astra-lvp avail=14542MB
+meta_astra-lvp rc=0 PASS=8996 FAIL=0
+before meta_align avail=13300MB
+meta_align rc=0 PASS=92 FAIL=0
+done Thursday 05 November 2026 05:02:27 PM IST

@@ -37,15 +37,16 @@ memory ordering, dependency handling, and misprediction recovery.
 The experiments demonstrated that unused incorrect LVP predictions
 do not require recovery and that V-ASTRA-served consumers do not
 trigger LVP recovery. They also exposed and helped correct a
-provisional-state cleanup defect on early alignment faults.
+provisional-state cleanup defect on early alignment faults. A complete
+regression of all suites on the final source revision passed with no
+failures.
 
 Overall, this work demonstrates the challenges of integrating
 value prediction into an in-order processor, particularly the
 interactions between speculative operands, address prediction,
 value-cache bypass, memory ordering, dependency tracking, and
 recovery. It provides a basis for further investigation of value
-prediction in MinorCPU. Important next steps include completing
-final-source validation, implementing architectural components
+prediction in MinorCPU. Important next steps include implementing architectural components
 such as the speculative L0 minicache and LACT, improving provisional
 candidate admission, and evaluating the mechanisms on more
 representative workloads.
