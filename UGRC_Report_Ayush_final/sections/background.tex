@@ -1,0 +1,167 @@
+\section{Background}
+
+\subsection{Last Value Prediction}
+
+The simplest guess for an instruction's result is the value it
+produced the last time it ran. Last Value Prediction (LVP) uses
+exactly this guess. It is a computational
+predictor that applies the identity function to the last observed
+value~\cite{ravenel2025architecting}. Predictions are usually
+associated with static instructions using their PCs, so observations
+from earlier executions can be reused.
+
+Instruction values may change across executions, so LVP uses a
+confidence counter to decide when a prediction is admitted. The design
+in \cite{ravenel2025architecting} uses a two-bit saturating counter,
+incremented on correct predictions and decremented on incorrect
+ones. A prediction is admitted only when the counter is saturated.
+In this implementation, the admission threshold is configurable.
+The counter is updated for every eligible load that completes,
+whether or not a prediction was made or used. This means entries
+below the threshold can keep gaining confidence.
+
+Accuracy alone is not enough, and neither is coverage. A predictor with high accuracy but few
+predictions may give little benefit. A predictor with high coverage
+may not help if the predicted instructions are not on critical
+dependency chains.
+
+LVP is especially relevant to in-order processors, where a
+long-latency load can delay younger dependent instructions. A
+predicted value lets eligible consumers, including dependent memory
+operations, proceed before the producer completes. Memory operations
+that would otherwise wait for one another can then overlap.
+
+The producer still runs, and its real value is checked against the
+prediction when it completes. If an
+incorrect value was used, the processor must recover the affected
+younger instructions to keep the architectural state correct.
+
+\subsection{ASTRA Address Prediction}
+
+Besides values, the paper also predicts load addresses, using a
+predictor called ASTRA (Address Stride Alias)~\cite{ravenel2025architecting}. It uses an order-1 differential
+finite-context method (D-FCM), with two modifications: it uses the
+last observed stride directly as history, and its tables are untagged.
+
+ASTRA is indexed by load PC. Its Last Address Table (LAT) stores
+the last committed virtual address and signed stride for each
+entry. The stride indexes a second table, Stride$\rightarrow$Stride
+(SS), which gives the stride that is added to the LAT address to
+form the predicted address. When a load retires, ASTRA computes the
+new stride, updates the corresponding SS entry, and records the
+committed address and stride in the LAT.
+
+Because the SS table is untagged, loads that see the same stride
+share entries. The paper uses this aliasing on purpose. When one
+load updates an entry, other loads can use it to predict a new
+access pattern. As a result, ASTRA favors prediction
+coverage over accuracy, and it depends on address validation before
+a prediction is used (Section~\ref{sec:bg-vastra}).
+
+The original ASTRA predicts the complete load address. V-ASTRA
+instead predicts the load's base-register value and adds the
+instruction displacement. This project implements the base-address
+form, so its LAT stores the base-register value rather than the
+complete effective address (Section~\ref{sec:impl-astra}). ASTRA
+predicts an address, not the loaded data. Getting the load value
+requires V-ASTRA's separate value cache.
+
+\subsection{V-ASTRA and the Value Cache}
+\label{sec:bg-vastra}
+
+To supply the data itself, V-ASTRA (Value-Address Stride Alias)
+uses ASTRA's predicted address to read a dedicated value cache, which
+stores previously observed load values. In the paper, the value cache holds 4\,KiB of data
+in 16-byte entries. Loads allocate entries at commit, while stores
+update matching entries without allocating new ones.
+
+V-ASTRA predicts a load's base address and adds the displacement
+from the decoded instruction to get its effective address.
+The paper checks the predicted base at issue by comparing it
+with the actual base-register value. A wrong prediction is
+therefore rejected before it is used, so V-ASTRA needs neither a
+confidence counter nor recovery from value mispredictions.
+
+For a bypass to be safe, the value cache must also contain the
+requested bytes, and no older in-flight store may modify them. The
+paper uses a counting Bloom filter to detect stores that might
+conflict, and an invalidation FIFO to handle older stores that
+issue after a prediction. When all checks succeed, the load skips
+the L1D access and its dependents can issue in the same cycle~\cite{ravenel2025architecting}.
+
+The implementation splits the check into two stages and replaces the Bloom
+filter and FIFO with an exact scan of older stores
+(Section~\ref{sec:impl-vcache}).
+
+\subsection{Dependency Handling}
+
+When an instruction needs a value from an earlier instruction, it
+has to wait for that producer. In an in-order processor,
+a consumer waiting for a long-latency load can also delay younger
+independent instructions, because issue follows program order. Under
+stall-on-use, a dependent instruction cannot issue until the
+producer's value becomes available.
+
+Two mechanisms can reduce this delay. Dependency release
+makes the consumer eligible to issue earlier but does not provide
+the required value. Value forwarding supplies the producer's
+value directly, so an eligible consumer can proceed before the
+producer completes. In the paper, issue-time V-ASTRA validation
+lets dependents issue in the same cycle as the load. MinorCPU
+handles operands differently. Ordinary non-memory instructions read
+their operands at commit, while memory operations can issue to
+the LSQ earlier (Section~\ref{sec:bg-minor}). For this reason, the
+forwarding mechanism in this implementation is restricted to eligible
+dependent loads.
+
+\subsection{META Selection}
+
+Some loads have predictable addresses, while others have predictable
+values. ASTRA/V-ASTRA targets the first kind and LVP the second, so
+META combines them to improve
+prediction coverage \cite{ravenel2025architecting}.
+
+In the original design, both predictors operate in parallel, and
+META selects a prediction at issue time. A validated V-ASTRA value
+is preferred when the predicted base is correct and the requested
+data is available in the value cache. Otherwise, META uses an
+LVP prediction if its confidence counter is saturated. If neither
+is available, the load is not predicted. Both predictors are updated
+when the load retires~\cite{ravenel2025architecting}.
+
+V-ASTRA
+validates its address before use, whereas LVP remains speculative
+until the actual value is available. So an incorrect LVP prediction
+needs recovery only if it was used. The paper replays younger
+instructions through the scoreboard, while the implementation squashes and
+refetches them (Section~\ref{sec:impl-meta}).
+
+\subsection{gem5 MinorCPU}
+\label{sec:bg-minor}
+
+All of this work is done in MinorCPU, gem5's in-order processor
+model~\cite{gem5}. Its four pipeline stages are Fetch1 (instruction fetch),
+Fetch2 (instruction separation and branch prediction), Decode, and
+Execute. Execute contains the functional-unit pipelines, in-flight
+instruction queue, commit logic, and load-store queue (LSQ).
+
+Instructions issue to functional units in program order when their
+source registers are ready according to the scoreboard. The
+scoreboard tracks expected result availability and the latest
+in-flight writer of each register, but does not hold register values.
+Results are written to architectural registers at commit, also in
+program order.
+
+Memory instructions can compute their addresses and enter the LSQ
+before they reach the head of the in-flight queue. However, they
+issue one at a time, and ordinarily only after the instructions that
+produce their sources have committed. Loads write their destination
+registers at commit. Branches are resolved in Execute, and a
+misprediction causes younger wrong-path instructions to be discarded.
+
+The memory functional unit uses \texttt{extraAssumedLat} to estimate
+when dependents may issue. With the default setting, dependents may
+issue after an assumed load latency, but they still wait for the
+producer to commit before executing. Setting this latency to zero
+enables the stall-on-use configuration, in which dependents wait for
+commit before issuing.

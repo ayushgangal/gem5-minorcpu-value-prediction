@@ -1,0 +1,114 @@
+\section{Limitations and Differences from the Original Paper}
+
+This work adapts the paper's prediction mechanisms to gem5 MinorCPU.
+It does not reproduce the paper's full processor or its evaluation
+setup~\cite{ravenel2025architecting}. The two differ in the
+processor model, in when predictions are checked, and in how
+performance is measured.
+
+\subsection{Processor Model and Evaluation Scope}
+
+The paper evaluates a modified CVA6-based processor on SPEC CPU2017
+using SimPoints. This work uses gem5 MinorCPU and small targeted
+RISC-V microbenchmarks. Both processors are four-wide. The paper's
+processor can issue two loads per cycle and has a 32-entry
+scoreboard. The MinorCPU setup used here issues at most one memory
+instruction per cycle, and its scoreboard tracks every architectural
+register~\cite{ravenel2025architecting}. The caches and workloads
+also differ. So the cycle reductions reported here describe this
+simulator setup and these microbenchmarks only. They are not
+application-level speedups and should not be compared directly with
+the paper's results.
+
+\subsection{Differences from the Original Design}
+\label{subsec:original-design-differences}
+
+\paragraph{LVP and recovery:} The LVP table and its confidence policy
+follow the paper~\cite{ravenel2025architecting}. The difference is in
+how predictions are used. Here, an LVP prediction can only serve as
+the base address of a dependent integer load, and only while its
+producer is the oldest instruction and still waiting for its data
+(Section~\ref{sec:lvp-integration}). Both the paper and this work
+recover only when a wrong prediction was actually used, but the
+recovery method differs. The paper replays younger instructions
+through its scoreboard, while the implementation squashes them and fetches
+them again.
+
+\paragraph{Address and tag compression:} The paper's Last Address
+Compressed Table (LACT) is a 32-entry LRU structure that replaces the
+upper 44 bits of an address with a 5-bit identifier and keeps only the
+lower 20 bits in the predictor. This cuts predictor storage by 85\%.
+The value-cache tags reuse the same identifier, which cuts tag
+storage by 75\%~\cite{ravenel2025architecting}. This work keeps full
+64-bit bases and full page-number tags instead. The value cache has
+the same 4\,KiB capacity and 16-byte entries as the paper's, but it
+tracks validity per byte, does not fill whole 16-byte lines.
+
+\paragraph{When V-ASTRA is checked:} The paper validates the predicted
+base at issue, so dependents can issue in the same cycle as the load.
+Here, the base is checked in Execute when the load forms its address,
+and the bypass is accepted later in the LSQ, after address translation
+and some of the safety checks (Section~\ref{sec:impl-vcache}).
+
+\paragraph{Store safety:} The paper tracks possible conflicts with
+older stores using a counting Bloom filter and an invalidation
+FIFO~\cite{ravenel2025architecting}. This work scans the older
+in-flight stores exactly, both when forming a candidate and again
+before the bypass. An exact scan avoids the Bloom filter's false
+positives, but its cost grows with the number of in-flight stores.
+The FIFO is not needed here. Memory operations enter the LSQ in
+order, so older store addresses are already known at the decision
+point.
+
+\paragraph{L0 minicache:} The paper's L0 minicache is a 32-entry
+direct-mapped structure with speculative and committed data. It lets
+loads blocked by in-flight stores still be served
+quickly~\cite{ravenel2025architecting}. It is not implemented here.
+Such loads fall back to the normal memory path, where MinorCPU's
+store buffer forwards fully covered loads and makes partly covered
+ones wait.
+
+\paragraph{Dependency handling:} In the paper, dependents of a
+validated load can issue and execute in the same cycle. In MinorCPU,
+non-memory instructions still execute at commit. Design~A only lets
+dependents issue earlier under stall-on-use timing, and it has no
+effect under the default timing. Design~B forwards a validated value,
+but only to the base address of a dependent integer load, not to ALU,
+branch, store, or floating-point instructions.
+
+\subsection{Future Work}
+
+\paragraph{Extending this work:} The random-base result suggests a
+smarter rule for when an LVP-supplied base may be used for V-ASTRA,
+for example based on LVP confidence, recent validation results, or
+agreement with ASTRA. Such a rule should be tested on random base,
+stable flip, V-cache flip, mixed, and the forced-misprediction
+workload, to check both gains and regressions. Design~B should be
+measured on its own, by comparing V-ASTRA with and without
+forwarding, and Design~A should be measured under stall-on-use
+timing. Design~B could also forward to other load operands and to
+store addresses. Forwarding to ALU and branch instructions would need
+larger changes to MinorCPU.
+
+\paragraph{Closer to the paper:} The biggest missing piece is the
+L0 minicache, which would give a fast path to loads that V-ASTRA
+currently rejects because of in-flight stores. It would need LSQ
+integration, speculative store handling, line locking, and recovery,
+and it should be evaluated on store-heavy workloads together with
+META. Adding LACT-style compression
+(Section~\ref{subsec:original-design-differences}) would mainly reduce
+storage. It would need identifier allocation and recycling,
+compressed tables and tags, cache invalidation when identifiers are
+reused, and a check for displacements that cross the compressed
+region. Replacing the exact store scan with a Bloom filter, or
+squash-and-refetch with scoreboard replay, would bring the design
+closer to the paper but is lower priority. The paper also discusses
+VTAGE, process-ID-tagged value-cache entries, multiprocessor support,
+and security~\cite{ravenel2025architecting}.
+
+\paragraph{Broader evaluation:} The current results use deterministic
+microbenchmarks and one processor and memory configuration. Future
+evaluations should use application-level and embedded benchmarks,
+other cache and memory-latency settings, and other processor widths
+where possible. Supporting compressed RISC-V loads would allow
+binaries built for \texttt{rv64gc}.

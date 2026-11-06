@@ -146,9 +146,7 @@ for example `fault` asserts "at least one" faulting consumer and observes 32.
   from the session transcript, not re-run for it.
 - **Raw outputs:** the original run directories under `/tmp` (for example
   `/tmp/lvp-fault-sim`, `/tmp/lvp-chain-sim`, `/tmp/lvp-threshold`) no longer
-  exist, so the raw traces, statistics and logs are gone. The session
-  transcript is at
-  `/home/ayushgangal/.claude/projects/-home-ayushgangal-gem5/d775bd4a-50a6-4e8f-974a-bc6994f67d20.jsonl`.
+  exist, so the raw traces, statistics and logs are gone.
 - **To keep real outputs for the review:** re-run section 5 with `OUT` under a
   durable directory (not `/tmp`) and keep `*.rc`, `*.out`, each `stats.txt`
   and `config.ini`, and the checker output. Traces and `Branch` logs can be

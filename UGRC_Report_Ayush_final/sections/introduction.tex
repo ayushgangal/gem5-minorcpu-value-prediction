@@ -1,0 +1,41 @@
+\section{Introduction}
+
+Modern processors often stall because of dependencies between
+instructions. Value prediction tries to reduce
+this delay by guessing an instruction's result before it is
+available, so that dependent operations can start earlier. A wrong
+guess must be detected and handled without breaking correctness.
+
+This project builds on
+``Architecting Value Prediction around In-Order Execution''
+\cite{ravenel2025architecting}. The paper studies value prediction in
+in-order processors using Last Value Prediction (LVP), ASTRA-based
+load-base prediction, and V-ASTRA. V-ASTRA combines a predicted load
+base with a dedicated value cache, so load values are available
+earlier. The paper also introduces META, which coordinates LVP and
+V-ASTRA. It further describes address compression, store tracking,
+scoreboard replay, and a speculative L0 minicache.
+
+My objective was to implement and evaluate similar mechanisms in
+gem5 using MinorCPU. MinorCPU differs from the processor in the
+original study, so I had to change how it handles loads, their
+dependent instructions, and recovery from wrong predictions.
+
+I implemented an LVP predictor and an ASTRA-based predictor for load
+base addresses. V-ASTRA adds the instruction's offset to the predicted
+base and reads the load value from a small value cache. When a set of
+safety checks passes, the load can skip its normal memory request.
+
+On top of these, I tried two ways of letting dependent instructions start
+earlier. Design~A only releases the scoreboard dependency, while
+Design~B also forwards the validated value. I also adapted META to
+choose at most one of LVP or V-ASTRA for each dependent load. Finally,
+an experimental option lets loads served by LVP feed their base
+addresses to ASTRA, both for training and for V-ASTRA candidacy.
+
+I evaluated the implementation using directed RISC-V regression
+tests and deterministic microbenchmarks. The tests check that predictions,
+bypasses, and recovery behave correctly. The performance experiments
+compare no prediction (NP), LVP, V-ASTRA, and META on workloads with
+different address, value, and dependency patterns, including the
+experimental provisional-base modes.

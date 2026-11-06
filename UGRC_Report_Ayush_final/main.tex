@@ -1,0 +1,109 @@
+\documentclass[11pt,a4paper]{article}
+
+% -------------------------------------------------
+% Packages
+% -------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+% TikZ diagrams
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{float}
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{xspace}
+\newcommand{\vcache}{value cache\xspace}
+
+% Long monospaced identifiers cannot be hyphenated. Allow some extra
+% inter-word stretch before a line is allowed to overflow the margin.
+\setlength{\emergencystretch}{2em}
+
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+% -------------------------------------------------
+% Title
+% -------------------------------------------------
+\title{
+    \textbf{Design and Evaluation of Value Prediction
+    Mechanisms in gem5 MinorCPU}
+}
+
+\author{
+    \textbf{Ayush Gangal}\\
+    \textbf{Department of Computer Science and Engineering}\\
+    \textbf{Indian Institute of Technology Madras}\\
+    \textbf{Advisor: Prof. Gopalakrishnan Srinivasan}
+}
+
+\date{}
+
+% -------------------------------------------------
+% Document
+% -------------------------------------------------
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+In an in-order processor, a load that is waiting for memory can hold up the instructions after it. Value prediction tries to fix this by guessing a result early, so that dependent instructions can start sooner. In this project, value prediction is added to gem5's MinorCPU, following a 2025 HPCA paper on value prediction for in-order cores.
+
+Last Value Prediction (LVP), an address predictor called ASTRA, and a small value cache are explored. V-ASTRA takes ASTRA's guess for a load's base address, adds the offset from the instruction, and reads the value from the value cache, so the load can skip the normal memory access. This work checks for two ways of letting dependent instructions start earlier, and built a version of the paper's META predictor, which picks at most one of LVP or V-ASTRA for each load that depends on an earlier load. An extra experimental mode lets loads predicted by LVP help train ASTRA and become V-ASTRA candidates.
+
+The mechanisms are validated with directed RISC-V tests and measured performance on small deterministic microbenchmarks. The benefit depends a lot on the workload. META matches V-ASTRA on several workloads, but on the random-base workload it reduces cycles by 30.27\%, while V-ASTRA alone reduces them by 48.75\%. The experimental candidate mode brings this up to 50.80\%.
+\end{abstract}
+
+{\raggedright\noindent\textbf{Source code:} \url{https://github.com/ayushgangal/gem5-minorcpu-value-prediction}
+(branch \texttt{astra-vastra-dev})\par}
+
+\newpage
+
+\tableofcontents
+\newpage
+
+\input{sections/introduction}
+\newpage
+\input{sections/background}
+\newpage
+\input{sections/implementation}
+\newpage
+\input{sections/validation}
+\newpage
+\input{sections/performance}
+\newpage
+\input{sections/limitations}
+\newpage
+\input{sections/conclusion}
+
+\section*{Acknowledgements}
+
+\begin{enumerate}
+    \item I thank my project guide, \textbf{Prof.\ Gopalakrishnan Srinivasan},
+    and my mentor, \textbf{Girinath}, for their guidance and feedback
+    throughout this project.
+
+    \item I used AI assistant (Claude, by Anthropic) during the
+    project. It helped with parts of the implementation and test
+    scripts, and with setting up and running the regression suite. I have crosschecked the code produced and ensured that the implementation matches with project's design. I have checked the workloads and the results myself. It
+    was also used to format the report in \LaTeX{}, improving the readability at some places and was used to make
+    diagrams and figures.
+\end{enumerate}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

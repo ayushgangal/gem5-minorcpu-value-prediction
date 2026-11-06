@@ -26,27 +26,25 @@
 
 \subsubsection{Simulation Configuration and Workloads}
 
-All experiments use gem5 MinorCPU with RISC-V syscall emulation,
-an L1 data cache, an L2 cache, and the default memory-functional-unit
-timing (\texttt{extraAssumedLat = 2}). NP and LVP use
-\texttt{configs/research/vp\_baseline.py}, while V-ASTRA and META
-are configured through \texttt{tests/astra/with\_params.py}.
+All experiments use the baseline configuration of
+Section~\ref{sec:impl-env} with the default memory timing
+(\texttt{extraAssumedLat = 2}). The predictors are turned on through
+configuration options.
 
-The twelve workloads are stable, random base, alternating value,
+I used twelve workloads: stable, random base, alternating value,
 V-cache miss, stable flip, V-cache flip, none, forwarding cold, mixed,
-store producer, forwarding both, and forwarding flip. The first four use 100 warm-up
-laps followed by 200 measured laps. The resulting counters are
-consistent with this setup. For example, four chain loads per lap
-produce 800 L1D read misses in the measured region.
-
-The first four workloads share a four-load dependency chain
-$P\rightarrow C\rightarrow E\rightarrow F$, in which each load supplies
-the next load's address. Here $P$ is the producer load, $C$ the
-dependent consumer load, and $E$ and $F$ the third and fourth loads in
-the chain. Conflict stores evict the chain lines from L1D
-on each lap, and the V-cache-miss variant spaces the lines 4~KiB apart
-so that they share a value-cache index.
-Table~\ref{tab:workload-characteristics} describes all twelve workloads.
+store producer, forwarding both, and forwarding flip. The first four
+share a chain of four dependent loads,
+$P\rightarrow C\rightarrow E\rightarrow F$, where each load supplies
+the next load's address. $P$ is the producer, $C$ is the dependent
+consumer, and $E$ and $F$ are the third and fourth loads. On each lap,
+conflict stores evict the chain lines from L1D. In the V-cache-miss
+variant, the lines are 4~KiB apart, so they share a value-cache index.
+These four workloads run 100 warm-up laps followed by 200 measured
+laps. The counters agree with this: four chain loads per lap give 800
+L1D read misses in the measured region.
+Table~\ref{tab:workload-characteristics} describes all twelve
+workloads.
 
 \begin{table}[H]
     \centering
@@ -99,28 +97,25 @@ Table~\ref{tab:workload-characteristics} describes all twelve workloads.
 
 \subsubsection{Measurement and Repetition}
 
-The principal metric is \texttt{numCycles} in the measured region.
-Only the first statistics block is used. The repeated end-of-run
-block is not added. Cycle reduction relative to NP is calculated as
+The main metric is the number of cycles in the measured region. The
+cycle reduction of a mode relative to no prediction (NP) is
 \[
   \text{Reduction (\%)} =
-  100\,\frac{C_{\mathrm{NP}}-C_{\mathrm{mode}}}
+  100*\,\frac{C_{\mathrm{NP}}-C_{\mathrm{mode}}}
   {C_{\mathrm{NP}}}.
 \]
 
-Each performance-sweep cell has five runs using identical executable
-bytes but different output-path lengths. Results are deterministic
-in almost all cells. The few differences have a spread of at most
-approximately 0.15\%. These repetitions therefore check sensitivity
-to output-path layout rather than provide independent samples for
-statistical confidence. An additional exact run reproduced the stable
-NP result.
+Each result was run five times with the same program, launched from
+output paths of different lengths. The simulator is deterministic, so
+almost all repeated runs gave exactly the same cycle count, and the
+few differences were at most about 0.15\%. These repeats only check
+how sensitive the results are to memory layout.
 
 \subsection{Standalone Predictor Comparison}
 \label{subsec:standalone-predictor-performance}
 
-Figure~\ref{tab:standalone-predictor-cycles} compares the cycle
-reduction of LVP-only and V-ASTRA-only relative to NP.
+Figure~\ref{tab:standalone-predictor-cycles} compares LVP alone and
+V-ASTRA alone on the first four workloads.
 
 \begin{figure}[H]
     \centering
@@ -142,25 +137,25 @@ reduction of LVP-only and V-ASTRA-only relative to NP.
     \label{tab:standalone-predictor-cycles}
 \end{figure}
 
-V-ASTRA's benefit depends on successful value-cache hits. On the
-stable workload, it produces 800 synthetic responses and eliminates
-all L1D read misses. On random base, it produces 595 synthetic
-responses, reducing L1D read misses from 800 to 205. On V-cache miss,
-all 800 accesses miss the value-cache tags, producing no synthetic
-responses and no cycle reduction. These runs have
-\texttt{fwdAdmitted = 0}. The measured gains therefore come from
-load bypass, not dependent-load forwarding.
+V-ASTRA only helps when the value cache has the data. On stable,
+all 800 chain loads were bypassed, and no L1D read misses were left. On random base, 595 loads
+bypassed, and L1D read misses fell from 800 to 205. On V-cache miss,
+all 800 lookups missed the value-cache tags, so there was no bypass
+and no gain. No load used forwarding in these runs, so all of
+V-ASTRA's gain here comes from the bypass itself. LVP gives smaller
+but steady gains on all four workloads, including V-cache miss, where
+V-ASTRA does not help at all.
 
-Sensitivity tests with 100--800 measured laps and at least five
-warm-up laps kept reductions within approximately 0.1 percentage
-points of the primary results.
+Changing the measured region from 100 to 800 laps, with at least five
+warm-up laps, changed the reductions by at most about 0.1 percentage
+points.
 
 \subsection{META Performance}
 \label{subsec:meta-performance}
 
-The META sweeps compare NP, LVP-only, V-ASTRA-only, and META.
-The main results use \texttt{metaAstraLvpLoads=off}. Figure~\ref{tab:meta-cycle-comparison}
-shows the cycle reduction of each mode relative to NP.
+Figure~\ref{tab:meta-cycle-comparison} compares LVP alone, V-ASTRA
+alone, and META on all twelve workloads, using the default
+\texttt{off} mode for LVP-served loads.
 
 \begin{figure}[H]
     \centering
@@ -225,22 +220,23 @@ shows the cycle reduction of each mode relative to NP.
     \label{tab:meta-cycle-comparison}
 \end{figure}
 
-META matches the better standalone predictor on nine of the twelve
-workloads and improves on both for mixed, reducing cycles by
-31.20\% relative to NP. However, it underperforms V-ASTRA-only on
-random base (24,828 versus 18,249 cycles) and
-stable flip (13,039 versus 12,912 cycles). Thus, combining
-predictors does not guarantee the best result on every workload.
-The performance results alone do not establish the cause of each
-difference. The random-base case is examined separately below.
+META matches the better of the two predictors on nine of the twelve
+workloads, and on mixed it beats both, with a 31.20\% reduction. Mixed
+is where combining helps most, because LVP serves one part of the lap
+and V-ASTRA the other. On random base and stable flip, however, META
+is slower than V-ASTRA alone: 24,828 versus 18,249 cycles on random
+base, and 13,039 versus 12,912 on stable flip. So combining the
+predictors does not always give the best result. These measurements
+alone do not explain every difference, but the random-base case is
+examined in the next subsection.
 
 \subsection{Provisional-Base Modes on the Random-Base Workload}
 \label{subsec:provisional-base-performance}
 
-The \texttt{metaAstraLvpLoads} parameter was evaluated in
-\texttt{off}, \texttt{train}, and \texttt{candidate} modes on the
-random-base workload. Figure~\ref{tab:randbase-mode-cycles} shows
-the resulting cycle reductions and L1D read misses.
+To find out why META loses on random base, I ran it in all three
+modes of Section~\ref{sec:impl-provisional}.
+Figure~\ref{tab:randbase-mode-cycles} shows the cycle reductions and
+L1D read misses.
 
 \begin{figure}[H]
     \centering
@@ -267,10 +263,9 @@ the resulting cycle reductions and L1D read misses.
     \label{tab:randbase-mode-cycles}
 \end{figure}
 
-Figure~\ref{tab:randbase-mode-events} shows the corresponding event
-counts. The candidate count is reported by
-\texttt{vastra.candidates}. In this experiment, it equals the number
-of synthetic responses.
+Figure~\ref{tab:randbase-mode-events} shows the matching event
+counts. In this workload, every V-ASTRA candidate also bypassed, so
+the candidate count equals the number of bypasses.
 
 \begin{figure}[H]
     \centering
@@ -297,39 +292,25 @@ of synthetic responses.
     \label{tab:randbase-mode-events}
 \end{figure}
 
-Train mode changes the cycle count by only 106 cycles relative to
-off (24,722 versus 24,828). Candidate mode reduces cycles by 7,310
-(29.4\%) relative to off and by 731 relative to V-ASTRA-only. It
-also reduces L1D read misses from 591 to 182 and increases synthetic
-responses from 209 to 618. The number of committed LVP-speculated
-loads falls from 386 in off and train to 182 in candidate mode.
-
-These counters are consistent with candidate mode restoring
-V-ASTRA opportunities for some LVP-served loads. However, they do
-not establish how much of the cycle reduction is caused by individual
-additional bypasses. Candidate counts alone are also not a reliable
-indicator of performance: on mixed, candidates increase from
-390 to 988 while synthetic responses remain at 191 and cycles do not
-change. On V-cache miss, candidates increase from 200 to 800, but
-no synthetic responses occur and cycles remain unchanged.
-
-The random-base experiment was repeated after the alignment retry
-fix, with one run per mode. The off, train, and candidate cycle counts
-exactly reproduced the five-run results.
+In \texttt{off} mode, LVP serves 386 loads, and none of them can
+become V-ASTRA candidates. This leaves only 209 candidates, compared
+with 595 for V-ASTRA alone. The \texttt{train} mode changes little,
+with only 106 fewer cycles than \texttt{off}. The \texttt{candidate}
+mode is much faster. It needs 7,310 fewer cycles than \texttt{off}
+(29.4\%) and 731 fewer than V-ASTRA alone. It raises the number of
+bypasses from 209 to 618, cuts L1D read misses from 591 to 182, and
+reduces the loads served by LVP from 386 to 182.
 
 \subsection{Performance of Dependency-Handling Designs}
 \label{subsec:dependency-performance}
 
-The performance harness uses the default memory-FU timing
-(\texttt{extraAssumedLat = 2}), under which Design~A's scoreboard
-release is inactive.
-
-Design~B forwarding is enabled in the V-ASTRA performance mode, but
-no V-ASTRA-without-forwarding control is available. Its contribution
-therefore cannot be isolated. Figure~\ref{tab:forwarding-performance}
-reports the combined configuration relative to NP. Forwarded
-consumer counts are from \texttt{vastra.fwdAdmitted} and represent
-admitted consumers, not committed instructions.
+These experiments use the default timing (\texttt{extraAssumedLat =
+2}), so Design~A has no effect here and is not measured. Design~B is
+turned on together with V-ASTRA, and there was no V-ASTRA run without
+forwarding to compare against. Figure~\ref{tab:forwarding-performance} shows V-ASTRA with
+forwarding against NP on the four forwarding workloads. The number
+under each workload counts loads admitted to forwarding, not
+committed instructions.
 
 \begin{figure}[H]
     \centering
@@ -346,33 +327,30 @@ admitted consumers, not committed instructions.
             {(fc,38.33) (mx,24.79) (fb,1.74) (ff,0.77)};
     \end{axis}
     \end{tikzpicture}
-    \caption{Cycle reduction of V-ASTRA (with forwarding) relative to NP
-    on the forwarding workloads. The number of forwarded consumers
-    (\texttt{vastra.fwdAdmitted}) is given under each workload.}
+    \caption{Cycle reduction of V-ASTRA with forwarding relative to NP on
+    the forwarding workloads. The number under each workload is the
+    number of loads admitted to forwarding.}
     \label{tab:forwarding-performance}
 \end{figure}
 
-Forwarding cold reduces cycles by 38.33\% while L1D misses remain
-unchanged at 400, despite 191 synthetic responses. This is consistent
-with a benefit from overlap, although the measurements do not isolate
-its contribution. The gains on forwarding both and forwarding flip
-are smaller (1.74\% and 0.77\%), with path-padding spreads of
-approximately 0.059\% and 0.152\%, respectively.
+On forwarding cold, cycles drop by 38.33\%, yet L1D read misses stay
+at 400, even with 191 bypasses. The gain seems to come from
+overlapping the cold misses rather than from avoiding them, although
+the measurements cannot isolate this. On forwarding both and
+forwarding flip, the gains are small (1.74\% and 0.77\%), with a
+run-to-run variation of about 0.06\% and 0.15\% on those workloads.
 
 \subsection{Threats to Validity and Interpretation}
 \label{subsec:performance-limitations}
 
-The results are deterministic microbenchmark measurements on a single
-MinorCPU, cache, and memory configuration. They do not represent
-application-level speedups. The repeated runs check sensitivity to
-output-path layout only and are not independent statistical samples.
-Design~A was not measured under the default timing, and the
-contribution of Design~B cannot be separated from V-ASTRA. Small
-effects close to the observed layout variation should therefore be
-interpreted with caution.
+These results come from small deterministic microbenchmarks on one
+MinorCPU, cache, and memory configuration, so they are not
+application-level speedups. The repeated runs only test sensitivity to
+memory layout, and are not independent statistical samples. Design~A
+was not measured under the default timing, and Design~B's share of
+the gain cannot be separated from V-ASTRA.
 
-Overall, the cycle reductions are substantial but depend on the
-workload. META improves on both standalone predictors on mixed, but is
-slower than V-ASTRA-only on random base and stable flip. Candidate mode
-gives a large improvement on random base, but its broader benefit is not
-established by these workloads.
+Overall, the cycle reductions are large but depend strongly on the
+workload. META beats both predictors on mixed, but is slower than
+V-ASTRA alone on random base and stable flip. Candidate mode gives a
+large improvement on random base.

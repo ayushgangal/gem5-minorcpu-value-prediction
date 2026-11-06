@@ -1,0 +1,44 @@
+\section{Conclusion}
+
+In this project, I added value prediction to gem5's MinorCPU. The
+implementation includes Last Value Prediction (LVP), the ASTRA base
+predictor, a separate value cache, and a guarded V-ASTRA bypass that
+lets a load skip memory when its safety checks pass. I also tried two
+ways of letting dependents start earlier. Design~A only releases the
+scoreboard dependency, and Design~B also forwards the validated value
+to a dependent load. On top of these, I adapted the paper's META to
+choose, for each dependent load, at most one of the V-ASTRA value and
+the LVP prediction. A load waits while the V-ASTRA outcome is still
+pending. An experimental option lets loads served by LVP pass their
+bases to ASTRA for training and for V-ASTRA candidacy.
+
+The results depend strongly on the workload. META gives a 31.20\%
+cycle reduction on the mixed workload, more than either predictor
+alone. On random base, however, default META reaches only 30.27\%,
+compared with 48.75\% for V-ASTRA alone. This is most likely because
+the loads served by LVP can no longer become V-ASTRA candidates. META
+is also slightly slower than V-ASTRA on stable flip. The experimental
+candidate mode gives these loads back to V-ASTRA and raises the
+random-base reduction to 50.80\%, but it did not change the cycle
+count on mixed or V-cache miss. These numbers describe small
+microbenchmarks on one simulated configuration, not application
+speedups. Design~A was validated but not performance-tested under
+stall-on-use, and Design~B's share of the gain could not be separated
+from V-ASTRA.
+
+Directed tests covered the predictors, the value cache, memory
+ordering, dependency handling, and recovery. They showed that a wrong
+LVP prediction needs recovery only if it was used, and that loads
+served by V-ASTRA never trigger LVP recovery. They also exposed a
+cleanup bug after early alignment faults, which I then fixed. A
+complete regression of all suites on the final source passed with no
+failures.
+
+Overall, the project shows how many parts of an in-order pipeline
+value prediction touches. Speculative operands, address prediction,
+the value-cache bypass, memory ordering, dependency tracking, and
+recovery all have to work together. It gives a working base for
+further study in MinorCPU. The most useful next steps are the L0
+minicache and LACT compression from the paper, a smarter rule for
+when LVP-served bases may become candidates, and evaluation on more
+realistic workloads.

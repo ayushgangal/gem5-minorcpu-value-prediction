@@ -1,0 +1,661 @@
+\section{Implementation}
+
+\subsection{Implementation Environment}
+\label{sec:impl-env}
+
+The implementation is based on gem5 version 23.0.0.1, and was developed on a separate branch. The simulator is built for the RISC-V ISA. All experiments use
+syscall-emulation mode with a single \texttt{RiscvMinorCPU} that has
+one hardware thread. The workloads are statically linked
+RISC-V programs built for the \texttt{rv64g} ISA.
+
+The baseline configuration models a 1\,GHz \texttt{RiscvMinorCPU}
+with timing memory accesses and 64-byte cache lines. The L1
+instruction cache is 32\,KiB and 4-way. The L1 data cache is 64\,KiB
+and 4-way, with 16 MSHRs and a stride prefetcher. The L2 cache is
+256\,KiB and 8-way, with 20 MSHRs and an AMPM prefetcher, and main
+memory is DDR4-2400. All pipeline widths are four. At most one memory
+instruction is issued and one is committed per cycle, and early memory
+issue is enabled. The CPU uses the \texttt{SingleThreaded} thread
+policy with up to 16 outstanding memory accesses.
+
+\subsection{LVP Integration}
+\label{sec:lvp-integration}
+
+The LVP predictor is integrated into the Execute stage of gem5
+MinorCPU. Execute
+must link each prediction to the correct dynamic producer and decide
+when a dependent load may use it. It must also substitute the
+predicted operand while generating the memory request, and validate
+the prediction when the producer's actual response arrives. If an
+incorrect prediction has influenced speculative execution, the
+younger instruction stream must be discarded and fetched again.
+
+The implementation described here covers standalone LVP-based
+load-to-load address speculation.
+
+\subsubsection{Configuration and Prediction Eligibility}
+
+Three configuration options decide whether LVP-based address
+speculation can operate. \texttt{enableLVP} enables the predictor,
+and \texttt{lvpSpecAddr} lets dependent loads use confident
+predictions as their base addresses. Address speculation also needs
+\texttt{executeAllowEarlyMemoryIssue} to be enabled. Invalid
+combinations are rejected when the Execute stage is constructed.
+
+An optional PC range can restrict address speculation to part of the
+program. If no range is set, speculation is allowed everywhere.
+
+By default, the predictor uses a 1,024-entry, untagged table
+indexed by the load instruction's PC:
+
+\[
+    \operatorname{index}(PC)
+    = (PC \gg 1) \mathbin{\&} (N-1),
+    \qquad N=1024.
+\]
+
+Each entry stores the most recently observed value and a 2-bit
+saturating confidence counter. The counter ranges from zero to
+three. The default prediction threshold is three, and it can be
+configured from one to three. A lookup returns a prediction only
+when the entry's confidence reaches the configured threshold. When
+the observed value matches the stored one, the counter is
+incremented, up to its maximum. When it does not match, the counter
+is decremented, down to zero. In both cases, the stored value is
+replaced by the newly observed value. Entries start with value zero
+and confidence zero. The table has no separate valid bit and no PC
+tag.
+
+The implementation also restricts which instructions can act as
+producers and consumers. An eligible producer is an ordinary integer
+load with one integer destination register, excluding the zero
+register. Atomics, store-conditionals, micro-operations, serializing
+instructions, and prefetches are excluded here. An eligible consumer must
+meet the same ordinary-load restrictions and have exactly one
+integer source register, which is its base address.
+
+As a result, the speculative operand path is limited to dependent
+loads. General ALU instructions do not directly consume LVP
+predictions.
+
+
+\subsubsection{Issue-Time Prediction and Dependency Tracking}
+
+Prediction lookup and dependency tracking run when an instruction
+issues into a functional unit, in program order.
+
+The predictor table and \texttt{lvpSpecMap} serve different purposes.
+The predictor table stores learned values indexed by static
+instruction PCs. \texttt{lvpSpecMap}, on the other hand, tracks the
+predicted writer that is currently available for each architectural
+register. It is kept separately for each thread. It maps a destination
+register to an entry containing the producer's dynamic
+sequence number, PC, and predicted value:
+
+\[
+\texttt{lvpSpecMap[tid][reg]}
+=
+\{\texttt{producerSeq},\texttt{producerPC},\texttt{value}\}.
+\]
+
+Issue-time processing has three steps, done in this order. The
+predictor lookup in the third step happens whenever LVP is enabled.
+The consumer lookup, destination invalidation, and insertion into
+\texttt{lvpSpecMap} happen only when address speculation
+(\texttt{lvpSpecAddr}) is also enabled. Without it, predictions are
+made and later validated, but no consumer can use them.
+
+\paragraph{1. Consumer dependency lookup:}
+If the issued instruction is an eligible consumer, Execute looks at
+its base register and searches \texttt{lvpSpecMap} for a matching
+entry. Finding an entry is not enough. The recorded producer sequence
+number must equal the consumer's \texttt{instToWaitFor} value, which
+identifies the dynamic instruction the consumer is waiting on. Both
+the consumer PC and the recorded producer PC must also fall inside
+the configured speculation window.
+
+When these checks pass, the consumer saves the producer's identity
+and the predicted value with itself. This snapshot keeps the
+producer-consumer relationship intact even if the map is updated
+later.
+
+\paragraph{2. Destination invalidation:}
+Execute then removes the existing map entries for every destination
+register written by the current instruction. This stops an older writer's prediction from staying available after a newer instruction
+has become the latest writer of that register. The invalidation is not
+limited to eligible loads. Any instruction that writes a register
+invalidates the corresponding entry.
+
+\paragraph{3. Producer prediction lookup:}
+Finally, if the current instruction is an eligible producer,
+Execute looks up its PC in the LVP table. If the lookup returns a
+confident prediction, the dynamic instruction is marked as predicted,
+and its predicted value and producer state are recorded. When address
+speculation is enabled, the prediction is also inserted into
+\texttt{lvpSpecMap} under its destination register. The
+entry identifies this particular dynamic instance by its execution
+sequence number.
+
+The sequence number is needed because several dynamic instructions
+can write the same architectural register. A consumer must use the
+prediction of the exact producer named in its dependency information,
+not just any prediction attached to that register.
+
+\subsubsection{Admission for Early Memory Issue}
+
+Saving a prediction in the consumer does not start speculative
+execution by itself. The unresolved dependency is the
+predicted load at the head of the in-flight queue. This path is tried
+only when the ordinary early-issue path cannot admit the consumer.
+
+The consumer is admitted through LVP only when the oldest memory reference is waiting to enter the LSQ. It
+must still hold a saved prediction whose producer matches its
+\texttt{instToWaitFor}, and it must not have been accepted yet. Its
+producer must be the in-flight head, still be marked as predicted,
+already be in the LSQ, and not yet have its memory response. Both
+instructions must belong to the current instruction stream.
+
+The producer must be the head, so every older instruction has already
+left the in-flight queue and the consumer never skips past a chain of
+unresolved dependencies. The producer must also be in the LSQ without
+a response, so speculation happens only while the real load result is
+still pending.
+
+\subsubsection{Operand Substitution and LSQ Request Generation}
+
+Once the consumer is admitted, Execute turns on operand substitution
+for the duration of the call that issues the load. While it is on, a
+read of the consumer's base register returns the saved predicted value
+instead of the register file value. The substitution applies only to
+that one operand of that one instruction, and the register file
+itself is never changed.
+
+The load then forms its effective address from the predicted base and
+sends a real memory request to the LSQ through the normal path. Only
+when this request has actually entered the LSQ is the consumer marked
+as accepted and the producer marked \texttt{lvpUsedBySpec}. Saving a
+prediction or passing the admission checks is not enough. Only an
+accepted request counts as speculative use, and only then can a later
+misprediction of the producer require recovery.
+
+\subsubsection{Producer Validation and Misprediction Recovery}
+
+The prediction is checked when the producer's memory response
+arrives. Execute handles completed instructions in program order, so
+the producer is always checked before any younger consumer can
+commit. Once the real value has been written to the destination
+register, the LVP table is trained with it. This happens for every
+eligible load, whether or not it was predicted.
+
+If the producer was predicted, the real value is compared with the
+prediction. Recovery is needed only when the prediction was wrong and
+the producer is marked \texttt{lvpUsedBySpec}. A wrong prediction
+that no accepted consumer used causes no redirect.
+
+For recovery, Execute keeps the producer and redirects fetch to the
+instruction right after it. This starts a new instruction stream,
+which clears \texttt{lvpSpecMap}. Every younger instruction from the
+old stream is then discarded by MinorCPU's normal stream check, not
+only the ones that used the wrong value, and is fetched again. The
+same check stops a late memory response from the old stream from
+completing. As an extra safeguard, an accepted consumer checks, when
+its own response arrives, that its base register now holds the value
+it used. By then the producer has committed, so a mismatch can only
+mean a recovery bug, and the simulation stops.
+
+The redirect also needs a small change in Fetch2. The younger branches may already have updated the
+branch predictor's speculative history. Fetch2 recognizes this case
+and rolls the branch predictor back to the redirect point. It does
+not treat the load as a mispredicted branch.
+
+Each instruction also tracks its producer and consumer roles
+separately, because a dependent load can use an older prediction
+while its own value is also predicted. When an instruction leaves the
+pipeline, the outcome of each role (committed, squashed, or faulted)
+is recorded. A producer's \texttt{lvpSpecMap} entry is removed only
+if it still belongs to that same producer, so cleanup never deletes a
+newer writer's prediction.
+
+\subsection{ASTRA Address Prediction}
+\label{sec:impl-astra}
+
+ASTRA is a PC-indexed predictor made of a Last Address Table (LAT)
+and a Stride$\rightarrow$Stride table (SS), with lookup and training
+done in the Execute stage. The paper's plain ASTRA stores the last
+address of a load. This implementation instead stores the load's last
+base-register value and predicts the next base value. The instruction's displacement is added only
+later, when V-ASTRA forms an effective address
+(Section~\ref{sec:impl-vcache}). Addresses keep their full 64-bit
+width.
+
+\subsubsection{Predictor Organization}
+
+Each LAT entry holds a 64-bit base and an index into the SS table,
+and each SS entry holds a signed 16-bit stride. Both tables have \(N\)
+entries, 1,024 by default. A load's LAT row \(r\) is chosen from its
+PC, and a stride \(S\) selects SS entry \(S \bmod N\), that is, its
+lower bits:
+\[
+    r = (PC \gg 1) \mathbin{\&} (N-1).
+\]
+The tables are untagged and have no valid bits or confidence
+counters. They start filled with zeros, so every eligible load gets a
+prediction.
+
+\subsubsection{Prediction and Base Capture}
+
+ASTRA makes a prediction when an eligible load issues. Eligible loads
+are ordinary loads with an integer base register, with the same
+exclusions as LVP. ASTRA reads the load's LAT entry to get the
+last stored base \(L\) and its SS index \(k\). It then adds the
+stride stored there, sign-extended from 16 bits, to get the predicted
+base:
+\[
+    B = L + SS[k].
+\]
+
+Just before the load sends its memory request, the base it actually
+uses is captured for training and for the V-ASTRA check. Normally,
+this is the value in the base register. If the base came from a
+validated V-ASTRA value through forwarding
+(Section~\ref{sec:impl-sb}), the forwarded value is captured instead.
+If it came from an LVP prediction, nothing is captured by default,
+because that value is not yet known to be correct. The experimental
+modes of Section~\ref{sec:impl-provisional} change this.
+
+On its own, ASTRA only makes and records predictions. It does not
+form an effective address or skip the memory access. That is done by
+V-ASTRA (Section~\ref{sec:impl-vcache}).
+
+\subsubsection{Training}
+
+ASTRA is trained when a load retires, so prediction happens at issue
+and the update happens at retirement. For a load whose captured base
+is \(A\), the new stride is
+\[
+    S = A - L.
+\]
+The stride is stored in 16 bits, so larger differences wrap around.
+The SS entry used for the last prediction is updated first, and then
+the LAT records the new base and the index of the new stride:
+\[
+    SS[k] \leftarrow S, \qquad
+    LAT[r] \leftarrow \bigl(A,\ S \bmod N\bigr).
+\]
+Only loads that commit with a captured base train ASTRA. Squashed and
+faulting loads do not. Training waits for retirement, so several
+instances of the same load may issue before the first one updates the
+tables, and these later instances use the older state. No speculative
+updates are made to hide this delay.
+
+\subsection{Value Cache and Load Bypass}
+\label{sec:impl-vcache}
+
+V-ASTRA adds a separate value cache and a guarded load bypass on top
+of ASTRA. It works in two stages. Execute first decides whether a load
+is a candidate, and the LSQ later decides whether the bypass actually
+happens. Being a candidate does not guarantee that the load will skip
+memory.
+
+\subsubsection{Value Cache Organization and Updates}
+
+The value cache is a 4\,KiB direct-mapped structure with 256 entries
+of 16 bytes each. Its index and tag come from the virtual address:
+\[
+    \operatorname{index}(A) = (A \gg 4) \mathbin{\&} 255,
+    \qquad
+    \operatorname{tag}(A) = A \gg 12.
+\]
+Each entry has an occupancy bit, a tag, 16 data bytes, and one valid
+bit per byte. A lookup hits only if the entry is occupied, the tag
+matches, and every byte the load needs is valid.
+
+The cache is updated when memory operations complete, as long as they
+did not fault and were not discarded. A load fills or replaces the
+entry at its index, but only the bytes it actually read are copied in
+and marked valid. Neighboring bytes are not filled. A store updates an
+entry only if the tag already matches, and never allocates a new one.
+Atomics, load-reserved and store-conditional operations, uncacheable
+accesses, and other special accesses invalidate the bytes they touch.
+Loads that cross a 16-byte boundary are ignored, while stores that
+cross one invalidate the affected bytes in both entries. A bypassed
+load does not update the cache, because its data did not come from
+memory. The whole cache is also flushed after every system call
+(\texttt{ecall}), since the operating system may have written memory.
+
+\subsubsection{V-ASTRA Candidate Selection}
+
+Candidate selection happens in Execute, right after the actual base
+has been captured and before the normal memory access starts. First,
+ASTRA's predicted base is compared with the actual base. If they
+differ, or no base was captured, the load is not a candidate. If they
+match, the effective address is formed from the predicted base \(B\)
+and the instruction's signed 12-bit displacement \(D\):
+\[
+    EA = B + D.
+\]
+The load is then checked against older stores. Issued stores,
+atomics, and store-conditionals are kept in a per-thread list with
+their addresses. The load's exact size is not known yet, so the scan
+conservatively checks an 8-byte range. An overlapping older store
+rejects the candidate, and so does an older store whose address is
+still unknown. The second case should not happen, because memory
+instructions enter the LSQ in program order, but the check is kept as
+a safeguard.
+
+If the load passes, it becomes a candidate. Its effective address and
+a snapshot of the matching value-cache entry (tag match, valid bytes,
+and data) are saved for the later bypass decision. A candidate does
+not need a value-cache hit at this point. That is checked later in
+the LSQ.
+
+\subsubsection{LSQ Bypass and Safety Checks}
+
+The actual bypass is decided later, when the load's request is about
+to leave the LSQ for memory. By then the address has been translated,
+so the TLB has already been accessed. The LSQ first applies its usual
+rules. The request must be in the current stream, have no translation
+fault, and not need load-reserved/store-conditional handling. No older
+store may still be waiting ahead of it. If the store buffer fully
+covers the load, normal store-to-load forwarding is used instead. If
+it only partly covers the load, the load waits.
+
+The bypass requires the load to be a candidate that has not already fallen back to memory, and it must
+be a plain single read that fits inside one 16-byte value-cache entry.
+Its real address must equal the address saved at candidate selection.
+Older stores are scanned again, this time with the exact access size.
+The saved snapshot must have a matching tag and all requested bytes
+valid. A fresh value-cache lookup must still return the same
+bytes, in case the cache changed after the candidate was chosen.
+
+If any check fails, the load falls back to a normal memory access. If all checks pass, the value-cache bytes
+are copied into the load's response and the request is marked
+complete. No memory request is sent. The address translation has
+already happened, so the bypass saves the memory access, not the
+translation. The load then completes and commits in order like any
+other load, and its value is written to the destination register at
+commit. Its data did not come from memory, so it does not update the
+value cache.
+
+\subsubsection{Strict Verification Mode}
+
+A strict verification mode was added to check the value cache's data
+without relying on it. In this mode, a candidate whose snapshot has a
+matching tag and valid bytes still goes to memory normally. When the
+real data returns, it is compared with the saved snapshot. A match is
+counted, and a mismatch stops the simulation with the details of the
+load. This mode cannot be combined with the actual bypass, because a
+bypassed load never receives real memory data to compare against.
+
+\subsection{Scoreboard Release and Dependent-Load Forwarding}
+\label{sec:impl-sb}
+
+MinorCPU's scoreboard tracks when each register's value is expected
+to be ready and which in-flight instruction will write it. It does
+not hold the values themselves. Instructions read their operands from
+the register file when they execute, except when the LVP substitution
+or the forwarding described below is active.
+
+The dependent wait depends on \texttt{extraAssumedLat}. With
+the default value of 2, a load's destination is not marked
+unpredictable, so dependents may issue before the load commits,
+although they can still be held back until it does. To model a strict
+stall-on-use policy, a separate configuration sets
+\texttt{extraAssumedLat} to zero. A load's destination is then marked
+unpredictable, and dependents cannot issue until that mark is cleared.
+
+\subsubsection{Design~A: Scoreboard Release}
+
+Design~A lets the dependents of a bypassed load become eligible to
+issue before the load commits. Under stall-on-use timing, an issued
+load's destination registers are marked unpredictable. Once the
+V-ASTRA bypass has succeeded and the load's response has been
+created, its result is known. At that point, Design~A clears the
+mark. Nothing else in the scoreboard or register file changes. A flag
+records that the mark was cleared, so
+it is not cleared a second time when the load later commits or is
+discarded. If the bypass fails, nothing is released and the load
+continues normally.
+
+This only changes when a dependent may issue. It does not give the
+dependent the producer's value, which is still read from the register
+file once the producer commits. A dependent can enter its functional
+unit earlier, but a dependent load still cannot send its memory
+request early through Design~A alone. Under the default memory-latency
+setting, loads are never marked unpredictable, so the release has no
+effect.
+
+\subsubsection{Design~B: Dependent-Load Forwarding}
+
+Design~B goes further and forwards the validated value to a dependent
+load. For each V-ASTRA candidate, a forwarding record is created with
+the producer's destination register, stream, value, and state, unless
+the candidate's base is a provisional LVP value
+(Section~\ref{sec:impl-provisional}). The record starts as
+\texttt{Pending}, because being a candidate does not mean the bypass
+will succeed. It becomes \texttt{Validated} only when the bypass
+succeeds, and \texttt{Failed} if the load falls back to memory or
+cannot be forwarded.
+
+When the record is validated, the value is rebuilt from the checked
+value-cache bytes, with the right sign or zero extension for the
+integer loads \texttt{lb}, \texttt{lbu}, \texttt{lh}, \texttt{lhu},
+\texttt{lw}, \texttt{lwu}, and \texttt{ld}. Floating-point loads
+cannot be producers.
+
+A dependent load can use the forwarded value only if it is an ordinary
+load with a single integer source which is at the front of the memory
+functional unit and is waiting on exactly this producer
+(\texttt{instToWaitFor}) in the same stream, with matching registers.
+The record must be \texttt{Validated}. With a pending or failed
+record, the consumer simply waits.
+
+When admitted, the consumer reads the forwarded value instead of its
+base register, using the same kind of temporary substitution as LVP.
+The register file itself is not changed. It forms its address and sends
+its memory request before the producer commits. ASTRA also captures
+this forwarded value as the consumer's base, so a forwarded load can
+itself become a candidate, bypass, and forward to the next load. This
+allows chains of forwarded loads. When the consumer's own response
+arrives, the producer has committed, so the register must now hold
+the forwarded value. A mismatch stops the simulation. Records are
+removed when instructions leave the pipeline, and checks at drain time
+confirm that none are left over.
+
+Forwarding needs V-ASTRA bypass, scoreboard release, and early memory
+issue to be enabled. It is off by default and supports a single
+hardware thread, like all value-cache features. I used it with the
+\texttt{SingleThreaded} commit policy. Without META, it cannot be
+combined with LVP address speculation. Neither design forwards values
+to arithmetic instructions, and neither is out-of-order execution.
+
+\subsection{META Integration}
+\label{sec:impl-meta}
+
+META sits in MinorCPU's early memory-issue path. When a dependent load
+at the front of the memory functional unit wants to issue before its
+producer commits, META decides whether it may use the V-ASTRA value,
+the LVP prediction, or neither. The decision is repeated on every
+commit pass until the load is admitted or can proceed normally.
+
+This differs from the paper's META, which picks one prediction per
+load at issue time. Here, META chooses the source of a dependent
+load's base operand. A choice only lets the load issue early in that
+cycle, and the source is recorded only if the load's memory request
+actually enters the LSQ. A load that is never admitted early counts
+as having used no prediction.
+
+\subsubsection{Selection Policy}
+
+META first finds the producer the dependent load is waiting on and
+looks up that producer's V-ASTRA forwarding record. It then applies
+this priority:
+
+\begin{enumerate}
+    \item \textbf{Validated V-ASTRA value:} if the record is
+    validated and the forwarding conditions hold, V-ASTRA is used.
+    \item \textbf{Pending V-ASTRA outcome:} if the record is still
+    pending, the load waits, even if LVP could serve it. META does not
+    fall back to LVP while the V-ASTRA outcome is undecided.
+    \item \textbf{LVP prediction:} if the record failed or does not
+    exist, LVP is used if its normal admission conditions hold.
+    \item \textbf{No prediction:} otherwise, the load waits for its
+    producer as usual.
+\end{enumerate}
+
+META reuses the existing V-ASTRA and LVP admission checks and does not
+change either one. It only decides which of them, if any, may serve
+the load. If both could serve it, V-ASTRA is chosen, and a check
+makes sure that a load is never accepted through both paths.
+
+\subsubsection{Source Attribution and Recovery}
+
+When the load enters the LSQ, the chosen source is recorded with it.
+The two sources need different recovery, so this record is important.
+An LVP-served load used a speculative value, so if the producer's
+prediction turns out wrong, the normal LVP recovery applies. A
+V-ASTRA-served load used an already validated value, so it never
+causes LVP recovery, even if the producer also had a wrong LVP
+prediction. That prediction is still checked and used to train LVP as
+usual.
+
+When a load leaves the
+pipeline, META records its source and whether it committed, was
+squashed, or faulted. It also checks that no load was accepted
+through both sources.
+
+\subsubsection{Configuration}
+
+META is off by default. Turning it on requires LVP with address
+speculation and V-ASTRA forwarding, which in turn need ASTRA, the
+value cache, V-ASTRA bypass, scoreboard release, and early memory
+issue.
+
+\subsection{Experimental ASTRA Interaction for LVP-Served Loads}
+\label{sec:impl-provisional}
+
+By default, a load whose base comes from an LVP prediction gives ASTRA
+nothing. Its base is not captured, so it does not train ASTRA and
+cannot become a V-ASTRA candidate. This limits how the two predictors
+work together, especially on workloads where LVP serves many loads.
+
+To study this, I added the \texttt{metaAstraLvpLoads} option with
+three modes. The default, \texttt{off}, keeps the behavior just
+described. \texttt{train} lets the LVP-supplied base train ASTRA, but
+only after it has been validated. \texttt{candidate} goes further and
+also lets that base be used for V-ASTRA candidate selection right
+away, before it is validated. None of the modes changes how META
+chooses between LVP and V-ASTRA.
+
+\subsubsection{Provisional Base Capture and Validation}
+\label{sec:impl-provisional-capture}
+
+In the \texttt{train} and \texttt{candidate} modes, the LVP-supplied
+base of a load is captured as a provisional base. It is recorded, but
+marked as not yet validated. Two separate flags are kept. One says
+whether the base is provisional. The other says whether the base may
+be used for the V-ASTRA decision. In \texttt{candidate} mode, both are
+set at once. A base can then be used for candidate selection while
+it is still unvalidated.
+
+The base is validated when the load's own memory response arrives.
+At that point, the base register is compared with the LVP value the
+load used. If they match, the provisional mark is cleared, and the
+base is replaced with the register value. The load then trains ASTRA
+at retirement in the normal way. This check happens before any fault
+on the response is handled, so a load with a correct base but a
+translation fault is counted as validated and then retires as faulted,
+without training ASTRA.
+
+If the load is discarded, or is re-executed after an early fault
+before being validated, its provisional base is dropped and never
+used for training. A load is never allowed to commit while its base
+is still provisional.
+
+\subsubsection{Mode \texttt{train}: Deferred ASTRA Training}
+
+In \texttt{train} mode, the LVP-supplied base is captured as
+provisional but is not usable for the V-ASTRA decision. The load
+therefore cannot become a candidate or bypass memory. When its
+response arrives and the base is validated, the base is replaced with
+the register value, and the load trains ASTRA when it retires. If the
+LVP prediction was wrong, normal LVP recovery discards the load, and
+its provisional base is dropped. A wrong LVP value can therefore never
+become an ASTRA training value. This mode gives ASTRA more
+information without letting an unvalidated base affect any V-ASTRA
+decision.
+
+\subsubsection{Mode \texttt{candidate}: Provisional V-ASTRA Candidacy}
+
+The \texttt{candidate} mode is more aggressive. The LVP-supplied base
+is captured as provisional and is also usable for the V-ASTRA
+decision right away. V-ASTRA compares ASTRA's predicted base \(B\)
+with this LVP value. If they match, the effective address is formed
+as usual:
+\[
+    EA = B + D.
+\]
+A match only shows that ASTRA and LVP agree. It does not show that
+the LVP value is correct.
+
+The candidate must still pass all the normal V-ASTRA safety checks i.e. the older-store scans, the snapshot check, and the fresh value-cache
+lookup in the LSQ. The address checked there is the one computed from
+the LVP value, so it confirms agreement with ASTRA. A bypass can therefore happen before the LVP prediction
+is validated. This is safe because the load is already an accepted
+LVP consumer. Its result is only a pending response. If the LVP
+prediction turns out wrong, normal LVP recovery discards the load
+before it commits. If the prediction is validated, the load trains
+ASTRA at retirement. Like other bypassed loads, it does not update the
+value cache.
+
+A load with a provisional base may not create a forwarding record.
+Otherwise, a younger load could receive a value derived from an
+unvalidated base. Such dependents simply wait for the producer as
+usual. The forced-misprediction tests check that every such bypassed load follows the order below, where each
+event happens in the same cycle as the previous one or later:
+\[
+    \text{bypass}
+    \;\rightarrow\;
+    \text{validation}
+    \;\rightarrow\;
+    \text{redirect}
+    \;\rightarrow\;
+    \text{discard}.
+\]
+
+\subsubsection{Fault Handling and Provisional-State Retry}
+
+One fault case exposed a bug in the first version of this mechanism.
+An early-issued load can use an LVP value to form its address and then
+hit an alignment fault before its request enters the LSQ. On RISC-V,
+this happens only when alignment checking is enabled. MinorCPU then
+stops the early attempt and runs the load again once it reaches the
+head of the in-flight queue. A translation fault is different,
+because it is reported with the response, after the provisional base
+has already been validated (Section~\ref{sec:impl-provisional-capture}).
+
+When the load runs again, the LVP substitution from the first attempt
+is no longer active, so the base is taken from the register file.
+Before the fix, the provisional mark from the first attempt could
+remain. The load then reached commit with a stale provisional base,
+which triggered the rule that a committed load must not have one. The
+fix drops any leftover provisional base at the start of every new
+base-capture attempt. Each attempt now starts clean.
+
+In \texttt{candidate} mode, the first attempt's V-ASTRA decision is
+also kept across the fault. On re-execution, the real address may
+differ from the one saved earlier, and the later bypass check then
+rejects the request because the two addresses do not match. If the LVP
+value had been correct, the re-executed load would use the same
+misaligned address and fault again, so it would never reach the
+bypass point.
+
+\subsubsection{Configuration}
+
+The \texttt{metaAstraLvpLoads} option takes the values \texttt{off},
+\texttt{train}, and \texttt{candidate}, with \texttt{off} as the
+default. The two experimental modes require META to be enabled.
+Counters record how many provisional bases are created, validated,
+and dropped. Validation and performance results for the three modes
+are given in Sections~\ref{subsec:meta-integration-recovery-validation}
+and~\ref{subsec:provisional-base-performance}.
